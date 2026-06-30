@@ -52,4 +52,22 @@ mod tests {
             }
         }
     }
+
+    mod matches {
+        mod when_called_with_a_minute_tuple_that_matches {
+            #[test]
+            fn then_true_is_returned() {
+                let expr = crate::domain::cron_expr::parse("*", "*", "*", "*", "*").unwrap();
+                assert!(crate::domain::cron_expr::matches(&expr, 0, 0, 1, 1, 0));
+            }
+        }
+
+        mod when_called_with_a_minute_tuple_that_does_not_match {
+            #[test]
+            fn then_false_is_returned() {
+                let expr = crate::domain::cron_expr::parse("0", "*", "*", "*", "*").unwrap();
+                assert!(!crate::domain::cron_expr::matches(&expr, 30, 0, 1, 1, 0));
+            }
+        }
+    }
 }
