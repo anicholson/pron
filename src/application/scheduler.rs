@@ -19,10 +19,10 @@ impl<C: Clock, R: ProcessRunner, L: Logger> Scheduler<C, R, L> {
     pub fn tick(&self) {
         let m = self.clock.now();
         for entry in &self.entries {
-            if cron_expr::matches(&entry.expr, m.min, m.hour, m.dom, m.mon, m.dow) {
-                if let Ok(output) = self.runner.run(&entry.command) {
-                    self.logger.log_job(&entry.command, &output);
-                }
+            if cron_expr::matches(&entry.expr, m.min, m.hour, m.dom, m.mon, m.dow)
+                && let Ok(output) = self.runner.run(&entry.command)
+            {
+                self.logger.log_job(&entry.command, &output);
             }
         }
     }
