@@ -5,11 +5,11 @@ pub trait Logger: Send + Sync {
 #[cfg(any(test, feature = "test-support"))]
 pub mod in_memory {
     use super::Logger;
-    use std::sync::Mutex;
+    use std::sync::{Arc, Mutex};
 
-    #[derive(Default)]
+    #[derive(Default, Clone)]
     pub struct InMemoryLogger {
-        pub events: Mutex<Vec<String>>,
+        pub events: Arc<Mutex<Vec<String>>>,
     }
 
     impl Logger for InMemoryLogger {
