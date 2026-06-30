@@ -5,16 +5,23 @@ pub trait ProcessControl: Send + Sync {
 #[cfg(any(test, feature = "test-support"))]
 pub mod in_memory {
     use super::ProcessControl;
+    use std::sync::Arc;
     use std::sync::atomic::{AtomicU32, Ordering};
 
-    #[derive(Default)]
+    #[derive(Clone)]
     pub struct InMemoryProcessControl {
-        pid: AtomicU32,
+        pid: Arc<AtomicU32>,
+    }
+
+    impl Default for InMemoryProcessControl {
+        fn default() -> Self {
+            Self { pid: Arc::new(AtomicU32::new(0)) }
+        }
     }
 
     impl InMemoryProcessControl {
         pub fn with_pid(pid: u32) -> Self {
-            Self { pid: AtomicU32::new(pid) }
+            Self { pid: Arc::new(AtomicU32::new(pid)) }
         }
     }
 
