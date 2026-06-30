@@ -1,6 +1,5 @@
 use std::fs;
 use std::process::Command;
-use std::time::Duration;
 
 mod when_a_prontab_with_a_syntax_error_is_placed_and_pron_d_is_started {
     use super::*;
