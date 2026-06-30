@@ -71,8 +71,13 @@ fn main() {
             Some(n) => n,
             None => continue,
         };
+        let name = name.replace('$', "::");
         let parts: Vec<&str> = name.split("::").collect();
-        root.insert(&parts, &event);
+        if parts.len() > 1 {
+            root.insert(&parts[1..], &event);
+        } else {
+            root.insert(&parts, &event);
+        }
     }
 
     root.print(0);
