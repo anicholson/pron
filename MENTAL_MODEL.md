@@ -18,6 +18,10 @@
 
 ## Invariants
 
+- One job runs at a time; the same job never overlaps itself.
+- Slots missed while stopped are not re-run.
+- The crontab is read on start only; a schedule change requires a restart.
+
 ## Decision Rationale
 
 ## Temporal View
