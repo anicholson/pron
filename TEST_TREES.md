@@ -49,6 +49,11 @@ Domain: CronExpr
   parse
     if a field value is invalid
       then a parse error is returned naming the field and value
+  matches
+    when called with a minute tuple that matches
+      then true is returned
+    when called with a minute tuple that does not match
+      then false is returned
 ```
 
 ### Use-case: start (src: src/application/start.rs; unit: src/application/start.rs; integration: none; functional: none)
