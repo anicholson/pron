@@ -1,7 +1,14 @@
 use std::fs;
 use std::process::Command;
 use std::thread;
-use std::time::Duration;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
+
+fn seconds_until_next_minute() -> u64 {
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap();
+    60 - (now.as_secs() % 60)
+}
 
 mod when_a_prontab_with_a_syntax_error_is_placed_and_pron_d_is_started {
     use super::*;
@@ -66,6 +73,35 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
 
         child.kill().unwrap();
         let _ = child.wait();
+    }
+
+    mod when_a_minute_boundary_is_crossed {
+        use super::*;
+
+        #[test]
+        fn then_the_jobs_command_runs_in_the_working_directory() {
+            let dir = tempfile::tempdir().unwrap();
+            fs::write(dir.path().join(".prontab"), "* * * * * touch .fired\n").unwrap();
+
+            let pron = env!("CARGO_BIN_EXE_pron");
+            let mut child = Command::new(pron)
+                .arg("-d")
+                .current_dir(dir.path())
+                .spawn()
+                .unwrap();
+
+            let wait = super::super::seconds_until_next_minute() + 3;
+            thread::sleep(Duration::from_secs(wait));
+
+            let fired = dir.path().join(".fired");
+            assert!(
+                fired.exists(),
+                "job should have run and created .fired in the working directory after {wait}s"
+            );
+
+            child.kill().unwrap();
+            let _ = child.wait();
+        }
     }
 }
 
