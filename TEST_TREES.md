@@ -65,3 +65,13 @@ Use-case: start
       then a start event is logged
       then the scheduler loop begins
 ```
+
+### Use-case: scheduler (src: src/application/scheduler.rs; unit: src/application/scheduler.rs; integration: none; functional: none)
+```
+Use-case: scheduler
+  tick
+    when the current minute matches an entry
+      then the entry's command is run
+    when the current minute does not match any entry
+      then no command is run
+```
