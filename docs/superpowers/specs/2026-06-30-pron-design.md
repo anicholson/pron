@@ -22,7 +22,7 @@ All files live in the directory pron was started in (the cwd at start):
 
 - `.prontab` — the crontab, read on start.
 - `.pron.pid` — pidfile, written on start (both modes), removed on clean shutdown.
-- `.pron.log` — log file, appended to in daemon mode (and only daemon mode).
+- `.pron.log` — log file, appended to in daemon mode only (foreground mode writes to the terminal instead).
 
 These are dotfiles, unobtrusive by convention.
 
