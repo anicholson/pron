@@ -42,7 +42,8 @@ fn main() {
 
     let clock = SystemClock::new();
     let runner = ShProcessRunner::new();
-    let scheduler = Scheduler::new(clock, runner, entries);
+    let log_for_scheduler = RealLogger::new(&cwd);
+    let scheduler = Scheduler::new(clock, runner, log_for_scheduler, entries);
 
     loop {
         let now = SystemTime::now()
