@@ -50,3 +50,13 @@ Domain: CronExpr
     if a field value is invalid
       then a parse error is returned naming the field and value
 ```
+
+### Use-case: start (src: src/application/start.rs; unit: src/application/start.rs; integration: none; functional: none)
+```
+Use-case: start
+  execute
+    when called with a valid crontab and daemon mode
+      then the pidfile is written with the current pid
+      then a start event is logged
+      then the scheduler loop begins
+```
