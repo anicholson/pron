@@ -170,3 +170,49 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
     }
 }
 
+mod when_pron_stop_is_invoked {
+    use super::*;
+
+    #[test]
+    fn then_the_daemon_receives_sigterm_and_pron_pid_is_removed_and_the_daemon_exits_cleanly() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let mut child = Command::new(pron)
+            .arg("-d")
+            .current_dir(dir.path())
+            .spawn()
+            .unwrap();
+
+        thread::sleep(Duration::from_millis(500));
+        assert!(
+            dir.path().join(".pron.pid").exists(),
+            "daemon should be running with pidfile"
+        );
+
+        let stop_output = Command::new(pron)
+            .arg("stop")
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+
+        assert!(
+            stop_output.status.success(),
+            "pron stop should succeed, stderr: {}",
+            String::from_utf8_lossy(&stop_output.stderr)
+        );
+
+        let status = child.wait().unwrap();
+        assert!(
+            status.success(),
+            "daemon should exit cleanly (exit 0), got {status}"
+        );
+
+        assert!(
+            !dir.path().join(".pron.pid").exists(),
+            ".pron.pid should be removed on clean shutdown"
+        );
+    }
+}
+
