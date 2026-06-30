@@ -98,7 +98,7 @@ Each command's stdout/stderr is written to the log between a `--- begin: <comman
 - A second SIGTERM → SIGKILL the child and exit immediately.
 - **SIGHUP** → ignored. Survives terminal hangup; no reload (the crontab is read on start only).
 
-`pron stop` reads `.pron.pid`, sends SIGTERM, waits up to a few seconds for the process to exit, then reports success or, if the process is still alive or the pidfile is stale, a warning.
+`pron stop` reads `.pron.pid`, sends SIGTERM, waits up to 5 seconds for the process to exit, then reports success or, if the process is still alive or the pidfile is stale, a warning.
 
 Signal wakeup: the scheduler sleeps in short increments (sub-second) checking an `AtomicBool` shutdown flag set by the signal handler, so shutdown is responsive even mid-sleep. While a child is running, the scheduler polls `try_wait()` in a loop checking the same flag, so a signal during a job aborts it promptly.
 
