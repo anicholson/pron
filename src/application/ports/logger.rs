@@ -1,5 +1,6 @@
 pub trait Logger: Send + Sync {
     fn log_start(&self, mode: &str, crontab_path: &str, entry_count: usize);
+    fn log_job(&self, command: &str, output: &str);
 }
 
 #[cfg(any(test, feature = "test-support"))]
@@ -17,6 +18,13 @@ pub mod in_memory {
             self.events.lock().unwrap().push(format!(
                 "start mode={} crontab={} entries={}",
                 mode, crontab_path, entry_count
+            ));
+        }
+
+        fn log_job(&self, command: &str, output: &str) {
+            self.events.lock().unwrap().push(format!(
+                "--- begin: {} ---\n{}\n--- end: {} ---",
+                command, output, command
             ));
         }
     }
