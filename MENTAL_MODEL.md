@@ -2,7 +2,7 @@
 
 ## Core Domain Identity
 
-- `pron` is a Rust binary in its initial scaffold; its domain behaviour is not yet established.
+- `pron` is a folder-scoped cron: it reads a `.prontab` from its working directory and runs scheduled commands there, in foreground or daemon mode.
 
 ## World-to-Code Mapping
 
