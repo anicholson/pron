@@ -12,12 +12,12 @@ impl<U: Filesystem, L: Logger, P: ProcessControl> Start<U, L, P> {
         Self { fs, logger, proc }
     }
 
-    pub fn execute(&self, crontab_text: &str, mode: &str) -> Result<(), String> {
+    pub fn execute(&self, crontab_text: &str, mode: &str) -> Result<Vec<crontab::Entry>, String> {
         let entries = crontab::parse(crontab_text).map_err(|e| e.to_string())?;
         let pid = self.proc.current_pid();
         self.fs.write_pidfile(pid)?;
         self.logger.log_start(mode, ".prontab", entries.len());
-        Ok(())
+        Ok(entries)
     }
 }
 
