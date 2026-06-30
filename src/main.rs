@@ -1,5 +1,6 @@
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::atomic::Ordering;
+use std::sync::{Arc, Mutex};
 use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
 use pron::adapters::clock::SystemClock;
@@ -11,7 +12,7 @@ use pron::application::ports::filesystem::Filesystem;
 use pron::application::scheduler::Scheduler;
 use pron::application::start::Start;
 
-static SHUTDOWN: AtomicBool = AtomicBool::new(false);
+static SHUTDOWN: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
 
 fn main() {
     let cwd: PathBuf = std::env::current_dir().unwrap_or_else(|e| {
