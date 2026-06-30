@@ -23,10 +23,10 @@ impl<U: Filesystem, L: Logger, P: ProcessControl> Start<U, L, P> {
 
 #[cfg(test)]
 mod tests {
-    use super::Start;
     use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
     use crate::application::ports::logger::in_memory::InMemoryLogger;
     use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+    use crate::application::start::Start;
 
     mod execute {
         mod when_called_with_a_valid_crontab_and_daemon_mode {
