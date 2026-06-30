@@ -45,12 +45,12 @@ fn main() {
     let scheduler = Scheduler::new(clock, runner, entries);
 
     loop {
-        scheduler.tick();
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
         let secs_remaining = 60 - (now % 60);
         std::thread::sleep(Duration::from_secs(secs_remaining));
+        scheduler.tick();
     }
 }
