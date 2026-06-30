@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "plugin": [
+    "https://github.com/obra/superpowers",
+    "./plugin/trunk-sync.ts"
+  ],
+  "permission": {
+    "bash": {
+      "git *": "deny",
+      "git diff*": "allow",
+      "git log*": "allow",
+      "git show*": "allow",
+      "git clone *": "allow"
+    }
+  }
+}
