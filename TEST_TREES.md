@@ -3,3 +3,24 @@
 This file holds the project's test trees. Each tree is an `###` subsection using EARS patterns (`when`/`then`, `while`/`then`, `if`/`then`, `where`/`then`, or bare `then`). Trees are the contract: every expected behaviour and side effect goes here, every tree is verified by a test, every test drives the real implementation.
 
 New trees are composed by the `change` skill.
+
+### Journey: scheduled-dev-tasks (journey: tests/journey_pron.rs)
+```
+Journey: scheduled-dev-tasks
+  when a .prontab with a syntax error is placed and pron -d is started
+    then pron refuses to start and reports the parse error
+  when the .prontab is fixed with a valid per-minute job and pron -d is started
+    then the daemon starts
+      then .pron.pid is written
+      then .pron.log is appended to with a start event
+      when a minute boundary is crossed
+        then the job's command runs in the working directory
+        then the command's output appears in .pron.log between begin and end markers
+      when another minute boundary is crossed
+        then the job runs a second time
+        and .pron.log shows a second set of begin and end markers
+  when pron stop is invoked
+    then the daemon receives SIGTERM
+    then .pron.pid is removed
+    then the daemon exits cleanly
+```
