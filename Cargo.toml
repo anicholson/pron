@@ -10,6 +10,7 @@ test-support = []
 
 [dev-dependencies]
 pron = { path = ".", features = ["test-support"] }
+tempfile = "3"
 
 [profile.mutants]
 inherits = "test"
