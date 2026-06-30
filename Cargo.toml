@@ -3,4 +3,17 @@ name = "pron"
 version = "0.1.0"
 edition = "2024"
 
+[features]
+test-support = []
+
 [dependencies]
+
+[dev-dependencies]
+pron = { path = ".", features = ["test-support"] }
+
+[profile.mutants]
+inherits = "test"
+debug = false
+
+[workspace]
+members = ["xtask"]
