@@ -40,6 +40,17 @@ pub fn parse(text: &str) -> Result<Vec<Entry>, ParseError> {
 #[cfg(test)]
 mod tests {
     mod parse {
+        mod when_a_line_has_five_valid_fields_and_a_command {
+            #[test]
+            fn then_an_entry_is_produced_with_the_parsed_expression_and_whitespace_collapsed_command() {
+                let result = crate::domain::crontab::parse("* * * * * echo    hi\n");
+                assert!(result.is_ok(), "expected Ok, got Err: {:?}", result);
+                let entries = result.unwrap();
+                assert_eq!(entries.len(), 1);
+                assert_eq!(entries[0].command, "echo hi");
+            }
+        }
+
         mod if_a_line_has_an_invalid_field_value {
             #[test]
             fn then_a_parse_error_is_returned_naming_the_line_and_field() {
