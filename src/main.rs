@@ -7,8 +7,11 @@ use pron::adapters::fs::RealFilesystem;
 use pron::adapters::logger::RealLogger;
 use pron::adapters::process_control::RealProcessControl;
 use pron::adapters::process_runner::ShProcessRunner;
+use pron::application::ports::filesystem::Filesystem;
 use pron::application::scheduler::Scheduler;
 use pron::application::start::Start;
+
+static SHUTDOWN: AtomicBool = AtomicBool::new(false);
 
 fn main() {
     let cwd: PathBuf = std::env::current_dir().unwrap_or_else(|e| {
