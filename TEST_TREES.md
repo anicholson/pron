@@ -72,6 +72,7 @@ Use-case: scheduler
   tick
     when the current minute matches an entry
       then the entry's command is run
+      then the command output is logged between begin and end markers
     when the current minute does not match any entry
       then no command is run
 ```
