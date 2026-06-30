@@ -23,15 +23,15 @@ impl<U: Filesystem, L: Logger, P: ProcessControl> Start<U, L, P> {
 
 #[cfg(test)]
 mod tests {
-    use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
-    use crate::application::ports::logger::in_memory::InMemoryLogger;
-    use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
-    use crate::application::start::Start;
-
     mod execute {
         mod when_called_with_a_valid_crontab_and_daemon_mode {
             #[test]
             fn then_the_pidfile_is_written_with_the_current_pid() {
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
                 let fs = InMemoryFilesystem::default();
                 let logger = InMemoryLogger::default();
                 let proc = InMemoryProcessControl::with_pid(4242);
@@ -44,6 +44,11 @@ mod tests {
 
             #[test]
             fn then_a_start_event_is_logged() {
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
                 let fs = InMemoryFilesystem::default();
                 let logger = InMemoryLogger::default();
                 let proc = InMemoryProcessControl::with_pid(4242);
