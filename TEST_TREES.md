@@ -24,3 +24,21 @@ Journey: scheduled-dev-tasks
     then .pron.pid is removed
     then the daemon exits cleanly
 ```
+
+### Domain: Crontab (src: src/domain/crontab.rs; unit: src/domain/crontab.rs; integration: none; functional: none)
+```
+Domain: Crontab
+  parse
+    when the crontab is empty
+      then no entries are produced
+    when a line starts with #
+      then the line is ignored
+    when a line is blank
+      then the line is ignored
+    when a line has five valid fields and a command
+      then an entry is produced with the parsed expression and whitespace-collapsed command
+    if a line has an invalid field value
+      then a parse error is returned naming the line and field
+    if a line has fewer than five fields
+      then a parse error is returned naming the line
+```
