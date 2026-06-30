@@ -37,12 +37,11 @@ mod tests {
                 let fs = InMemoryFilesystem::default();
                 let logger = InMemoryLogger::default();
                 let proc = InMemoryProcessControl::with_pid(4242);
-                let start = Start::new(fs, logger, proc);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
 
                 start.execute("* * * * * echo hi\n", "daemon").unwrap();
 
-                let shared = crate::application::ports::filesystem::in_memory::InMemoryFilesystem::default();
-                let _ = shared;
+                assert_eq!(*fs.pid.lock().unwrap(), Some(4242));
             }
 
             #[test]
@@ -50,9 +49,15 @@ mod tests {
                 let fs = InMemoryFilesystem::default();
                 let logger = InMemoryLogger::default();
                 let proc = InMemoryProcessControl::with_pid(4242);
-                let start = Start::new(fs, logger, proc);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
 
                 start.execute("* * * * * echo hi\n", "daemon").unwrap();
+
+                let events = logger.events.lock().unwrap();
+                assert_eq!(events.len(), 1);
+                assert!(events[0].contains("start"), "event: {}", events[0]);
+                assert!(events[0].contains("daemon"), "event: {}", events[0]);
+                assert!(events[0].contains("entries=1"), "event: {}", events[0]);
             }
         }
     }
