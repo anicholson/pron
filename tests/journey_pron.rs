@@ -136,5 +136,37 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
             let _ = child.wait();
         }
     }
+
+    mod when_another_minute_boundary_is_crossed {
+        use super::*;
+
+        #[test]
+        fn then_the_job_runs_a_second_time() {
+            let dir = tempfile::tempdir().unwrap();
+            fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+            let pron = env!("CARGO_BIN_EXE_pron");
+            let mut child = Command::new(pron)
+                .arg("-d")
+                .current_dir(dir.path())
+                .spawn()
+                .unwrap();
+
+            let wait1 = super::super::seconds_until_next_minute() + 3;
+            thread::sleep(Duration::from_secs(wait1));
+
+            thread::sleep(Duration::from_secs(60));
+
+            let log = fs::read_to_string(dir.path().join(".pron.log")).unwrap();
+            let begin_count = log.matches("--- begin:").count();
+            assert_eq!(
+                begin_count, 2,
+                "job should have run twice (two begin markers), got {begin_count}: {log}"
+            );
+
+            child.kill().unwrap();
+            let _ = child.wait();
+        }
+    }
 }
 
