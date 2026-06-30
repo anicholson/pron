@@ -1,5 +1,10 @@
-#[derive(Debug)]
-pub struct CronExpr;
+pub struct CronExpr {
+    minute: u64,
+    hour: u64,
+    dom: u64,
+    month: u64,
+    dow: u64,
+}
 
 #[derive(Debug)]
 pub struct ParseError(String);
@@ -10,14 +15,31 @@ impl std::fmt::Display for ParseError {
     }
 }
 
+fn parse_field(s: &str, min: u32, max: u32, name: &str) -> Result<u64, ParseError> {
+    if s == "*" {
+        let mut bits = 0u64;
+        for v in min..=max {
+            bits |= 1 << v;
+        }
+        return Ok(bits);
+    }
+    Err(ParseError(format!("{} field: invalid value '{}'", name, s)))
+}
+
 pub fn parse(
-    _minute: &str,
-    _hour: &str,
-    _dom: &str,
-    _month: &str,
-    _dow: &str,
+    minute: &str,
+    hour: &str,
+    dom: &str,
+    month: &str,
+    dow: &str,
 ) -> Result<CronExpr, ParseError> {
-    Ok(CronExpr)
+    Ok(CronExpr {
+        minute: parse_field(minute, 0, 59, "minute")?,
+        hour: parse_field(hour, 0, 23, "hour")?,
+        dom: parse_field(dom, 1, 31, "day-of-month")?,
+        month: parse_field(month, 1, 12, "month")?,
+        dow: parse_field(dow, 0, 6, "day-of-week")?,
+    })
 }
 
 #[cfg(test)]
