@@ -90,7 +90,7 @@ Logged events, each a timestamped line:
 - job exited with code N (or "exited with signal S" / "failed to spawn: <error>")
 - pron shutdown (clean)
 
-Each command's stdout/stderr is written to the log under a marker, interleaved with the event lines. In foreground mode, command output flows straight to pron's stdout/stderr.
+Each command's stdout/stderr is written to the log between a `--- begin: <command> ---` and `--- end: <command> ---` marker, interleaved with the event lines. In foreground mode, command output flows straight to pron's stdout/stderr with no markers.
 
 ## Signals and shutdown
 
