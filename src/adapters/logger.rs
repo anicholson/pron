@@ -30,4 +30,12 @@ impl<'a> Logger for RealLogger<'a> {
             mode, crontab_path, entry_count
         ));
     }
+
+    fn log_job(&self, command: &str, output: &str) {
+        self.append(&format!("--- begin: {} ---", command));
+        if !output.is_empty() {
+            self.append(output.trim_end());
+        }
+        self.append(&format!("--- end: {} ---", command));
+    }
 }
