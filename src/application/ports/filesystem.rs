@@ -6,11 +6,11 @@ pub trait Filesystem: Send + Sync {
 #[cfg(any(test, feature = "test-support"))]
 pub mod in_memory {
     use super::Filesystem;
-    use std::sync::Mutex;
+    use std::sync::{Arc, Mutex};
 
-    #[derive(Default)]
+    #[derive(Default, Clone)]
     pub struct InMemoryFilesystem {
-        pub pid: Mutex<Option<u32>>,
+        pub pid: Arc<Mutex<Option<u32>>>,
     }
 
     impl Filesystem for InMemoryFilesystem {
