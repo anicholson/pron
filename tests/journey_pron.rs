@@ -102,6 +102,39 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
             child.kill().unwrap();
             let _ = child.wait();
         }
+
+        #[test]
+        fn then_the_commands_output_appears_in_pron_log_between_begin_and_end_markers() {
+            let dir = tempfile::tempdir().unwrap();
+            fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+            let pron = env!("CARGO_BIN_EXE_pron");
+            let mut child = Command::new(pron)
+                .arg("-d")
+                .current_dir(dir.path())
+                .spawn()
+                .unwrap();
+
+            let wait = super::super::seconds_until_next_minute() + 3;
+            thread::sleep(Duration::from_secs(wait));
+
+            let log = fs::read_to_string(dir.path().join(".pron.log")).unwrap();
+            assert!(
+                log.contains("--- begin:"),
+                ".pron.log should contain a begin marker, got: {log}"
+            );
+            assert!(
+                log.contains("hi"),
+                ".pron.log should contain the command output 'hi', got: {log}"
+            );
+            assert!(
+                log.contains("--- end:"),
+                ".pron.log should contain an end marker, got: {log}"
+            );
+
+            child.kill().unwrap();
+            let _ = child.wait();
+        }
     }
 }
 
