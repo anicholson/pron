@@ -24,4 +24,7 @@
 
 ## Decision Rationale
 
+- A hand-written 5-field cron parser; the `cron` crate is 7-field with named days/months and a heavier dependency tree.
+- Plain std threads plus `signal-hook`; the workload is sleep-match-spawn-wait, so an async runtime would add footprint without benefit.
+
 ## Temporal View
