@@ -1,5 +1,10 @@
+use crate::domain::cron_expr;
+
 #[derive(Debug)]
-pub struct Entry;
+pub struct Entry {
+    pub expr: cron_expr::CronExpr,
+    pub command: String,
+}
 
 #[derive(Debug)]
 pub struct ParseError(String);
@@ -10,8 +15,26 @@ impl std::fmt::Display for ParseError {
     }
 }
 
-pub fn parse(_text: &str) -> Result<Vec<Entry>, ParseError> {
-    Ok(vec![])
+pub fn parse(text: &str) -> Result<Vec<Entry>, ParseError> {
+    let mut entries = vec![];
+    for (i, line) in text.lines().enumerate() {
+        let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
+        let parts: Vec<&str> = line.split_whitespace().collect();
+        if parts.len() < 6 {
+            return Err(ParseError(format!(
+                "line {}: expected 5 fields and a command",
+                i + 1
+            )));
+        }
+        let expr = cron_expr::parse(parts[0], parts[1], parts[2], parts[3], parts[4])
+            .map_err(|e| ParseError(format!("line {}: {}", i + 1, e)))?;
+        let command = parts[5..].join(" ");
+        entries.push(Entry { expr, command });
+    }
+    Ok(entries)
 }
 
 #[cfg(test)]
