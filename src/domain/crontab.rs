@@ -40,6 +40,33 @@ pub fn parse(text: &str) -> Result<Vec<Entry>, ParseError> {
 #[cfg(test)]
 mod tests {
     mod parse {
+        mod when_the_crontab_is_empty {
+            #[test]
+            fn then_no_entries_are_produced() {
+                let result = crate::domain::crontab::parse("");
+                assert!(result.is_ok());
+                assert!(result.unwrap().is_empty());
+            }
+        }
+
+        mod when_a_line_starts_with_hash {
+            #[test]
+            fn then_the_line_is_ignored() {
+                let result = crate::domain::crontab::parse("# this is a comment\n");
+                assert!(result.is_ok());
+                assert!(result.unwrap().is_empty());
+            }
+        }
+
+        mod when_a_line_is_blank {
+            #[test]
+            fn then_the_line_is_ignored() {
+                let result = crate::domain::crontab::parse("   \n\n");
+                assert!(result.is_ok());
+                assert!(result.unwrap().is_empty());
+            }
+        }
+
         mod when_a_line_has_five_valid_fields_and_a_command {
             #[test]
             fn then_an_entry_is_produced_with_the_parsed_expression_and_whitespace_collapsed_command() {
@@ -64,6 +91,19 @@ mod tests {
                 assert!(
                     error.contains("field"),
                     "error should name the field: {error}"
+                );
+            }
+        }
+
+        mod if_a_line_has_fewer_than_five_fields {
+            #[test]
+            fn then_a_parse_error_is_returned_naming_the_line() {
+                let result = crate::domain::crontab::parse("* * * echo hi\n");
+                assert!(result.is_err());
+                let error = result.unwrap_err().to_string();
+                assert!(
+                    error.contains("line 1"),
+                    "error should name the line: {error}"
                 );
             }
         }
