@@ -13,9 +13,13 @@ cargo build
 ## Use
 
 ```sh
-cargo run    # run the binary
-cargo test   # run Rust tests (none yet)
+cargo run          # run the binary
+make test          # run all tests (tree-formatted)
+make test-lib      # run unit tests only (Domain + Use-case)
+make test-mutate   # mutation testing (Domain + Use-case)
 ```
+
+See `AGENTS.md` for the full per-layer test command reference.
 
 ## Configure
 
