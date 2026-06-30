@@ -60,7 +60,7 @@ fn main() {
     let scheduler = Scheduler::new(clock, runner, log_for_scheduler, entries);
 
     loop {
-        if shutdown.load(Ordering::Relaxed) {
+        if SHUTDOWN.load(Ordering::Relaxed) {
             let fs = RealFilesystem::new(&cwd);
             let _ = fs.remove_pidfile();
             std::process::exit(0);
@@ -73,13 +73,13 @@ fn main() {
         let secs_remaining = 60 - (now % 60);
         let sleep_until = SystemTime::now() + Duration::from_secs(secs_remaining);
         while SystemTime::now() < sleep_until {
-            if shutdown.load(Ordering::Relaxed) {
+            if SHUTDOWN.load(Ordering::Relaxed) {
                 break;
             }
             std::thread::sleep(Duration::from_millis(200));
         }
 
-        if !shutdown.load(Ordering::Relaxed) {
+        if !SHUTDOWN.load(Ordering::Relaxed) {
             scheduler.tick();
         }
     }
