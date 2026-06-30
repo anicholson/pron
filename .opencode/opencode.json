@@ -1,6 +1,6 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "instructions": [".opencode/contree.md"],
+  "instructions": [".opencode/contree.md", "AGENTS.md"],
   "plugin": [
     "https://github.com/obra/superpowers",
     "./plugin/trunk-sync.ts",
