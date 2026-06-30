@@ -50,9 +50,9 @@ fn main() {
         }
     };
 
-    let shutdown = AtomicBool::new(false);
-    signal_hook::flag::register(signal_hook::consts::SIGTERM, &shutdown).unwrap();
-    signal_hook::flag::register(signal_hook::consts::SIGINT, &shutdown).unwrap();
+    let _ = &SHUTDOWN;
+    signal_hook::flag::register(signal_hook::consts::SIGTERM, &SHUTDOWN).unwrap();
+    signal_hook::flag::register(signal_hook::consts::SIGINT, &SHUTDOWN).unwrap();
 
     let clock = SystemClock::new();
     let runner = ShProcessRunner::new();
