@@ -1,8 +1,12 @@
 use std::path::PathBuf;
+use std::time::{Duration, SystemTime, UNIX_EPOCH};
 
+use pron::adapters::clock::SystemClock;
 use pron::adapters::fs::RealFilesystem;
 use pron::adapters::logger::RealLogger;
 use pron::adapters::process_control::RealProcessControl;
+use pron::adapters::process_runner::ShProcessRunner;
+use pron::application::scheduler::Scheduler;
 use pron::application::start::Start;
 
 fn main() {
@@ -28,12 +32,25 @@ fn main() {
     let proc = RealProcessControl::new();
     let start = Start::new(fs, logger, proc);
 
-    if let Err(e) = start.execute(&content, mode) {
-        eprintln!("error: {e}");
-        std::process::exit(1);
-    }
+    let entries = match start.execute(&content, mode) {
+        Ok(e) => e,
+        Err(e) => {
+            eprintln!("error: {e}");
+            std::process::exit(1);
+        }
+    };
+
+    let clock = SystemClock::new();
+    let runner = ShProcessRunner::new();
+    let scheduler = Scheduler::new(clock, runner, entries);
 
     loop {
-        std::thread::sleep(std::time::Duration::from_secs(60));
+        scheduler.tick();
+        let now = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs();
+        let secs_remaining = 60 - (now % 60);
+        std::thread::sleep(Duration::from_secs(secs_remaining));
     }
 }
