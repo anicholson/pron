@@ -12,8 +12,6 @@ use pron::application::ports::filesystem::Filesystem;
 use pron::application::scheduler::Scheduler;
 use pron::application::start::Start;
 
-static SHUTDOWN: std::sync::atomic::AtomicBool = std::sync::atomic::AtomicBool::new(false);
-
 fn main() {
     let cwd: PathBuf = std::env::current_dir().unwrap_or_else(|e| {
         eprintln!("error: cannot determine current directory: {e}");
