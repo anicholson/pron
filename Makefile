@@ -1,6 +1,6 @@
 NEXTEST_JSON := NEXTEST_EXPERIMENTAL_LIBTEST_JSON=1
 TREEFMT := | cargo run -p xtask --
-JSONFMT := --message-format libtest-json --message-format-version 0.1
+JSONFMT := --message-format libtest-json --message-format-version 0.1 --no-tests pass
 
 .PHONY: test test-lib test-integration test-flat test-watch test-mutate test-ci lint
 
