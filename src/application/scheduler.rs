@@ -57,7 +57,6 @@ mod tests {
             fn then_the_command_output_is_logged_between_begin_and_end_markers() {
                 use crate::application::ports::clock::in_memory::InMemoryClock;
                 use crate::application::ports::logger::in_memory::InMemoryLogger;
-                use crate::application::ports::process_runner::ProcessRunner;
                 use crate::application::scheduler::Scheduler;
                 use crate::domain::crontab;
 
