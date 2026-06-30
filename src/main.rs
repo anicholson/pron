@@ -84,7 +84,7 @@ fn main() {
     }
 }
 
-fn do_stop(cwd: &PathBuf) {
+fn do_stop(cwd: &Path) {
     let pid_str = match std::fs::read_to_string(cwd.join(".pron.pid")) {
         Ok(s) => s,
         Err(e) => {
