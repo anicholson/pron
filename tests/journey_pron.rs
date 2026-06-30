@@ -203,10 +203,15 @@ mod when_pron_stop_is_invoked {
             String::from_utf8_lossy(&stop_output.stderr)
         );
 
-        let status = child
-            .wait_timeout(Duration::from_secs(10))
-            .unwrap()
-            .expect("daemon should exit within 10s of pron stop");
+        let mut exited = None;
+        for _ in 0..100 {
+            if let Ok(Some(status)) = child.try_wait() {
+                exited = Some(status);
+                break;
+            }
+            thread::sleep(Duration::from_millis(100));
+        }
+        let status = exited.expect("daemon should exit within 10s of pron stop");
         assert!(
             status.success(),
             "daemon should exit cleanly (exit 0), got {status}"
