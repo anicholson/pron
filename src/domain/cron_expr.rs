@@ -1,3 +1,4 @@
+#[derive(Debug)]
 pub struct CronExpr {
     minute: u64,
     hour: u64,
