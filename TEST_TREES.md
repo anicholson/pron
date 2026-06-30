@@ -42,3 +42,11 @@ Domain: Crontab
     if a line has fewer than five fields
       then a parse error is returned naming the line
 ```
+
+### Domain: CronExpr (src: src/domain/cron_expr.rs; unit: src/domain/cron_expr.rs; integration: none; functional: none)
+```
+Domain: CronExpr
+  parse
+    if a field value is invalid
+      then a parse error is returned naming the field and value
+```
