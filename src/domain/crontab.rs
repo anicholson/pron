@@ -20,7 +20,7 @@ mod tests {
         mod if_a_line_has_an_invalid_field_value {
             #[test]
             fn then_a_parse_error_is_returned_naming_the_line_and_field() {
-                let result = crate::domain::crontab::parse("not a valid cron line\n");
+                let result = crate::domain::crontab::parse("not * * * * echo hi\n");
                 assert!(result.is_err());
                 let error = result.unwrap_err().to_string();
                 assert!(
