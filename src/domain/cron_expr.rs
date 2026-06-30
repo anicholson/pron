@@ -1,5 +1,11 @@
 #[derive(Debug)]
-pub struct CronExpr;
+pub struct CronExpr {
+    minute: u64,
+    hour: u64,
+    dom: u64,
+    month: u64,
+    dow: u64,
+}
 
 #[derive(Debug)]
 pub struct ParseError(String);
@@ -10,11 +16,18 @@ impl std::fmt::Display for ParseError {
     }
 }
 
-fn parse_field(s: &str, name: &str) -> Result<(), ParseError> {
+fn parse_field(s: &str, min: u32, max: u32, name: &str) -> Result<u64, ParseError> {
     if s == "*" {
-        return Ok(());
+        let mut bits = 0u64;
+        for v in min..=max {
+            bits |= 1 << v;
+        }
+        return Ok(bits);
     }
-    Err(ParseError(format!("{} field: invalid value '{}'", name, s)))
+    match s.parse::<u32>() {
+        Ok(v) if (min..=max).contains(&v) => Ok(1 << v),
+        _ => Err(ParseError(format!("{} field: invalid value '{}'", name, s))),
+    }
 }
 
 pub fn parse(
@@ -24,12 +37,21 @@ pub fn parse(
     month: &str,
     dow: &str,
 ) -> Result<CronExpr, ParseError> {
-    parse_field(minute, "minute")?;
-    parse_field(hour, "hour")?;
-    parse_field(dom, "day-of-month")?;
-    parse_field(month, "month")?;
-    parse_field(dow, "day-of-week")?;
-    Ok(CronExpr)
+    Ok(CronExpr {
+        minute: parse_field(minute, 0, 59, "minute")?,
+        hour: parse_field(hour, 0, 23, "hour")?,
+        dom: parse_field(dom, 1, 31, "day-of-month")?,
+        month: parse_field(month, 1, 12, "month")?,
+        dow: parse_field(dow, 0, 6, "day-of-week")?,
+    })
+}
+
+pub fn matches(expr: &CronExpr, min: u32, hour: u32, dom: u32, mon: u32, dow: u32) -> bool {
+    (expr.minute & (1 << min) != 0)
+        && (expr.hour & (1 << hour) != 0)
+        && (expr.dom & (1 << dom) != 0)
+        && (expr.month & (1 << mon) != 0)
+        && (expr.dow & (1 << dow) != 0)
 }
 
 #[cfg(test)]
