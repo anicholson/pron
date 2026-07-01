@@ -76,6 +76,44 @@ mod tests {
     }
 
     mod matches {
+        mod when_called_with_a_tuple_that_matches_a_fully_numeric_expression {
+            #[test]
+            fn then_true_is_returned() {
+                let expr = crate::domain::cron_expr::parse("5", "3", "15", "7", "2").unwrap();
+                assert!(crate::domain::cron_expr::matches(&expr, 5, 3, 15, 7, 2));
+            }
+
+            #[test]
+            fn and_false_is_returned_for_a_one_off_minute() {
+                let expr = crate::domain::cron_expr::parse("5", "3", "15", "7", "2").unwrap();
+                assert!(!crate::domain::cron_expr::matches(&expr, 6, 3, 15, 7, 2));
+            }
+
+            #[test]
+            fn and_false_is_returned_for_a_one_off_hour() {
+                let expr = crate::domain::cron_expr::parse("5", "3", "15", "7", "2").unwrap();
+                assert!(!crate::domain::cron_expr::matches(&expr, 5, 4, 15, 7, 2));
+            }
+
+            #[test]
+            fn and_false_is_returned_for_a_one_off_day_of_month() {
+                let expr = crate::domain::cron_expr::parse("5", "3", "15", "7", "2").unwrap();
+                assert!(!crate::domain::cron_expr::matches(&expr, 5, 3, 16, 7, 2));
+            }
+
+            #[test]
+            fn and_false_is_returned_for_a_one_off_month() {
+                let expr = crate::domain::cron_expr::parse("5", "3", "15", "7", "2").unwrap();
+                assert!(!crate::domain::cron_expr::matches(&expr, 5, 3, 15, 8, 2));
+            }
+
+            #[test]
+            fn and_false_is_returned_for_a_one_off_day_of_week() {
+                let expr = crate::domain::cron_expr::parse("5", "3", "15", "7", "2").unwrap();
+                assert!(!crate::domain::cron_expr::matches(&expr, 5, 3, 15, 7, 3));
+            }
+        }
+
         mod when_called_with_a_minute_tuple_that_matches {
             #[test]
             fn then_true_is_returned() {
