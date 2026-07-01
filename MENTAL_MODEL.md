@@ -12,7 +12,7 @@
 - entry — a parsed crontab line: a cron expression paired with a command.
 - tick — a scheduler wake at a minute boundary.
 - pidfile — `.pron.pid`; records the running pid and enforces single-instance.
-- foreground mode / daemon mode — pron's two run modes; foreground prints to the terminal, daemon detaches and logs to `.pron.log`.
+- foreground mode / daemon mode — pron's two run modes; both run the scheduler loop and log to `.pron.log` and write `.pron.pid`. The `-d` flag currently selects the same code path as foreground (daemonization is not yet implemented).
 
 ## Bounded Contexts
 
