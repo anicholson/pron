@@ -1,5 +1,3 @@
-use pron::application::ports::process_runner::ProcessRunner;
-
 #[macro_export]
 macro_rules! process_runner_contract {
     ($make:expr) => {
@@ -10,7 +8,7 @@ macro_rules! process_runner_contract {
                 mod when_called_with_a_command {
                     #[test]
                     fn then_the_command_is_executed_and_stdout_returned() {
-                        let runner = $make();
+                        let runner = $make;
                         let result = runner.run("echo hi");
                         assert!(result.is_ok());
                         let output = result.unwrap();
@@ -22,11 +20,6 @@ macro_rules! process_runner_contract {
     };
 }
 
-pub use process_runner_contract;
+use pron::adapters::process_runner::ShProcessRunner;
 
-#[cfg(test)]
-mod tests {
-    use pron::adapters::process_runner::ShProcessRunner;
-
-    process_runner_contract!(|| ShProcessRunner::new());
-}
+process_runner_contract!(ShProcessRunner::new());
