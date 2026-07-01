@@ -6,6 +6,10 @@ status-level = "pass"
 failure-output = "immediate"
 success-output = "never"
 
+[[profile.default.overrides]]
+filter = 'binary(journey_pron)'
+slow-timeout = { period = "300s", terminate-after = 2 }
+
 [profile.ci]
 retries = 3
 fail-fast = false
