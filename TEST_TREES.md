@@ -85,6 +85,8 @@ Use-case: scheduler
       then the command output is logged between begin and end markers
     when the current minute does not match any entry
       then no command is run
+    when the clock advances across multiple ticks
+      then each matching minute fires a command
 ```
 
 ### Port: Clock (src: src/application/ports/clock.rs; unit: tests/port_clock.rs; integration: none; functional: none)
