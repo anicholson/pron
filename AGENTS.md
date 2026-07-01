@@ -70,7 +70,7 @@ Sync compares tree text against module/test structure after slug normalisation (
 
 ### In-memory twins and contract suites
 
-In-memory twins live in `src/lib.rs`, gated `#[cfg(any(test, feature = "test-support"))]` and `pub`. The `test-support` feature is enabled in `[dev-dependencies]` so integration tests can use them.
+In-memory twins live in `src/application/ports/*.rs` (under `in_memory` submodules), gated `#[cfg(any(test, feature = "test-support"))]` and `pub`. The `test-support` feature is enabled in `[dev-dependencies]` so integration tests can use them.
 
 Shared port contract suites are `macro_rules!` that expand to nested `mod`/`#[test]`, invoked in both the in-memory unit test module and the real-adapter integration test file.
 
