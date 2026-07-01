@@ -115,7 +115,7 @@ mod tests {
         mod if_a_line_has_exactly_five_fields_and_a_command {
             #[test]
             fn then_the_boundary_between_valid_and_invalid_is_pinned() {
-                let ok = crate::domain::crontab::parse("0 0 1 1 0 echo hi\n");
+                let ok = crate::domain::crontab::parse("0 0 1 1 0 echo\n");
                 assert!(ok.is_ok(), "6 parts should succeed: {:?}", ok);
                 assert_eq!(ok.unwrap().len(), 1);
 
