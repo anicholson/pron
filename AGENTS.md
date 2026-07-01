@@ -20,7 +20,7 @@
 | Layer | Command | Notes |
 |---|---|---|
 | All (tree) | `make test` | All tests, tree-formatted |
-| Unit (tree) | `make test-lib` | Domain + Use-case + driving Adapter (`--lib`) |
+| Unit (tree) | `make test-lib` | Domain + Use-case (`--lib`) |
 | Integration (tree) | `make test-integration` | Driven Adapter + System + Journey (`tests/`) |
 | Flat output | `make test-flat` | Raw nextest, no tree formatter |
 | Watch | `make test-watch` | watchexec re-runs unit tests on `.rs` changes |
