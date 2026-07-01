@@ -12,8 +12,20 @@ cargo build
 
 ## Use
 
+Place a `.prontab` in the working directory, one job per line as `min hour dom mon dow command`:
+
 ```sh
-cargo run          # run the binary
+echo "* * * * * echo hi" > .prontab   # one job per line: min hour dom mon dow command
+pron -d                              # run the scheduler loop (writes .pron.pid, logs to .pron.log)
+pron stop                            # stop the running pron (SIGTERM) and remove .pron.pid
+```
+
+`-d` / `--daemon` selects daemon mode (the label recorded in the start event); the scheduler loop runs in the invoking process and logs to `.pron.log` in both modes.
+
+## Develop
+
+```sh
+cargo build        # build the binary
 make test          # run all tests (tree-formatted)
 make test-lib      # run unit tests only (Domain + Use-case)
 make test-mutate   # mutation testing (Domain + Use-case)
