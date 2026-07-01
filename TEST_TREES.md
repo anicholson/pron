@@ -72,7 +72,8 @@ Use-case: start
     when called with a valid crontab and daemon mode
       then the pidfile is written with the current pid
       then a start event is logged
-      then the scheduler loop begins
+    if called with an invalid crontab
+      then a parse error is returned without writing the pidfile
 ```
 
 ### Use-case: scheduler (src: src/application/scheduler.rs; unit: src/application/scheduler.rs; integration: none; functional: none)
