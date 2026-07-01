@@ -1,6 +1,6 @@
 # pron
 
-`pron` is a folder-scoped cron: it reads a `.prontab` from its working directory and runs scheduled commands there, in foreground or daemon mode. Currently in its initial scaffold (domain behaviour designed but not yet implemented). It is developed using the contree test-tree-driven workflow on top of [opencode](https://opencode.ai).
+`pron` is a folder-scoped cron: it reads a `.prontab` from its working directory and runs scheduled commands there, in foreground or daemon mode. It is developed using the contree test-tree-driven workflow on top of [opencode](https://opencode.ai).
 
 ## Install
 
