@@ -2,6 +2,8 @@
 macro_rules! clock_contract {
     ($make:expr) => {
         mod clock_contract {
+            use pron::application::ports::clock::Clock;
+
             mod now {
                 mod when_called {
                     #[test]
