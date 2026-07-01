@@ -39,7 +39,7 @@ cargo nextest run --lib -E 'test(/pron::application/)'    # Use-case only
 Integration tests live in `tests/` as separate binaries. Run a specific one:
 
 ```sh
-cargo nextest run --test <binary_name>     # e.g. --test system_pron
+cargo nextest run --test <binary_name>     # e.g. --test journey_pron
 ```
 
 ### Test structure convention
