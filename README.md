@@ -48,5 +48,3 @@ The mental model lives at `MENTAL_MODEL.md` (project root) and the test-tree con
 ## Development workflow
 
 This project uses the contree test-tree-driven workflow: expected behaviour is captured as test trees, verified by tests, and driven into the implementation outside-in. See `.opencode/contree.md` for the full rules.
-
-To bootstrap test trees and the test framework, run the `setup` skill.
