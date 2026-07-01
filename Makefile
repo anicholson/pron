@@ -20,7 +20,7 @@ test-watch:
 	watchexec -e rs -- make test-lib
 
 test-mutate:
-	cargo mutants -p pron -e src/main.rs -- --lib --no-tests pass
+	cargo mutants -p pron -e src/main.rs -- --no-tests pass
 
 test-ci:
 	cargo nextest run --profile ci
