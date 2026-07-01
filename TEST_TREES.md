@@ -95,6 +95,7 @@ Port: Clock
   now
     when called
       then the current minute tuple is returned
+      and each field is within its valid range
 ```
 
 ### Port: ProcessRunner (src: src/application/ports/process_runner.rs; unit: tests/port_process_runner.rs; integration: none; functional: none)
