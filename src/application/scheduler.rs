@@ -102,5 +102,34 @@ mod tests {
                 assert!(commands.is_empty());
             }
         }
+
+        mod when_the_clock_advances_across_multiple_ticks {
+            #[test]
+            fn then_each_matching_minute_fires_a_command() {
+                use crate::application::ports::clock::in_memory::InMemoryClock;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_runner::in_memory::InMemoryProcessRunner;
+                use crate::application::scheduler::Scheduler;
+                use crate::domain::crontab;
+
+                let entries = crontab::parse("0 * * * * echo hi\n").unwrap();
+                let clock = InMemoryClock::with(0, 0, 1, 1, 0);
+                let runner = InMemoryProcessRunner::default();
+                let logger = InMemoryLogger::default();
+
+                let scheduler = Scheduler::new(clock.clone(), runner.clone(), logger, entries);
+
+                scheduler.tick();
+                clock.set(1, 0, 1, 1, 0);
+                scheduler.tick();
+                clock.set(0, 1, 1, 1, 0);
+                scheduler.tick();
+
+                let commands = runner.commands.lock().unwrap();
+                assert_eq!(commands.len(), 2);
+                assert_eq!(commands[0], "echo hi");
+                assert_eq!(commands[1], "echo hi");
+            }
+        }
     }
 }
