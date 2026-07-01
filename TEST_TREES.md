@@ -86,3 +86,19 @@ Use-case: scheduler
     when the current minute does not match any entry
       then no command is run
 ```
+
+### Port: Clock (src: src/application/ports/clock.rs; unit: tests/port_clock.rs; integration: none; functional: none)
+```
+Port: Clock
+  now
+    when called
+      then the current minute tuple is returned
+```
+
+### Port: ProcessRunner (src: src/application/ports/process_runner.rs; unit: tests/port_process_runner.rs; integration: none; functional: none)
+```
+Port: ProcessRunner
+  run
+    when called with a command
+      then the command is executed and stdout returned
+```
