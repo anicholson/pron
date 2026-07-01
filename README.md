@@ -43,7 +43,7 @@ Development tooling lives under `.opencode/`:
 - `.opencode/plugin/` — opencode plugins: `contree.ts` (drift nudges, mental-model validation, self-care) and `trunk-sync.ts` (session timekeeping).
 - `.opencode/skill/` — contree skills: `change`, `tdd`, `sync`, `setup`, `workflow`, `diff-for-humans`, `second-opinion`.
 
-The mental model lives at `MENTAL_MODEL.md` (project root) and the test-tree contract at `TEST_TREES.md` (project root, not yet bootstrapped — see Development workflow).
+The mental model lives at `MENTAL_MODEL.md` (project root) and the test-tree contract at `TEST_TREES.md` (project root).
 
 ## Development workflow
 
