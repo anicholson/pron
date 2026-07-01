@@ -23,7 +23,7 @@ pub fn parse(text: &str) -> Result<Vec<Entry>, ParseError> {
             continue;
         }
         let parts: Vec<&str> = line.split_whitespace().collect();
-        if parts.len() < 6 {
+        if parts.len() <= 6 {
             return Err(ParseError(format!(
                 "line {}: expected 5 fields and a command",
                 i + 1
