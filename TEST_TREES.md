@@ -20,9 +20,7 @@ Journey: scheduled-dev-tasks
         then the job runs a second time
         and .pron.log shows a second set of begin and end markers
   when pron stop is invoked
-    then the daemon receives SIGTERM
-    then .pron.pid is removed
-    then the daemon exits cleanly
+    then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
 ```
 
 ### Domain: Crontab (src: src/domain/crontab.rs; unit: src/domain/crontab.rs; integration: none; functional: none)
