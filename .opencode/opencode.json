@@ -14,5 +14,16 @@
       "git show*": "allow",
       "git clone *": "allow"
     }
+  },
+  "agent": {
+    "code-reviewer": {
+      "description": "Reviews code for best practices and potential issues",
+      "mode": "subagent",
+      "model": "opencode/deepseek-v4-flash",
+      "prompt": "You are a code reviewer with deep experience in idiomatic Rust. Focus on security, performance, and maintainability.",
+      "permission": {
+        "edit": "deny"
+      }
+    }
   }
 }
