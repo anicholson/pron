@@ -1,11 +1,7 @@
-use pron::adapters::process_runner::ShProcessRunner;
-
 #[macro_export]
 macro_rules! process_runner_contract {
     ($make:expr) => {
         mod process_runner_contract {
-            use super::*;
-
             mod run {
                 mod when_called_with_a_command {
                     #[test]
@@ -22,4 +18,4 @@ macro_rules! process_runner_contract {
     };
 }
 
-process_runner_contract!(ShProcessRunner::new());
+process_runner_contract!(pron::adapters::process_runner::ShProcessRunner::new());
