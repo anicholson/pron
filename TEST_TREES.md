@@ -49,7 +49,16 @@ Domain: CronExpr
   parse
     if a field value is invalid
       then a parse error is returned naming the field and value
+    if a field value is out of range
+      then a parse error is returned naming the field and value
   matches
+    when called with a tuple that matches a fully numeric expression
+      then true is returned
+      and false is returned for a one-off minute
+      and false is returned for a one-off hour
+      and false is returned for a one-off day-of-month
+      and false is returned for a one-off month
+      and false is returned for a one-off day-of-week
     when called with a minute tuple that matches
       then true is returned
     when called with a minute tuple that does not match
