@@ -41,6 +41,8 @@ Domain: Crontab
       then a parse error is returned naming the line and field
     if a line has fewer than five fields
       then a parse error is returned naming the line
+    if a line has exactly five fields and a command
+      then the boundary between valid and invalid is pinned
 ```
 
 ### Domain: CronExpr (src: src/domain/cron_expr.rs; unit: src/domain/cron_expr.rs; integration: none; functional: none)
