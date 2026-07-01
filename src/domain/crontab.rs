@@ -105,6 +105,27 @@ mod tests {
                     error.contains("line 1"),
                     "error should name the line: {error}"
                 );
+                assert!(
+                    error.contains("5 fields"),
+                    "error should name the expected field count: {error}"
+                );
+            }
+        }
+
+        mod if_a_line_has_exactly_five_fields_and_a_command {
+            #[test]
+            fn then_the_boundary_between_valid_and_invalid_is_pinned() {
+                let ok = crate::domain::crontab::parse("0 0 1 1 0 echo hi\n");
+                assert!(ok.is_ok(), "6 parts should succeed: {:?}", ok);
+                assert_eq!(ok.unwrap().len(), 1);
+
+                let err = crate::domain::crontab::parse("0 0 1 1 echo hi\n");
+                assert!(err.is_err(), "5 parts should fail");
+                let error = err.unwrap_err().to_string();
+                assert!(
+                    error.contains("5 fields"),
+                    "error should name the field count: {error}"
+                );
             }
         }
     }
