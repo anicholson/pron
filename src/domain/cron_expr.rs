@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct CronExpr {
     minute: u64,
     hour: u64,
