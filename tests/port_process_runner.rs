@@ -1,3 +1,5 @@
+use pron::adapters::process_runner::ShProcessRunner;
+
 #[macro_export]
 macro_rules! process_runner_contract {
     ($make:expr) => {
@@ -19,7 +21,5 @@ macro_rules! process_runner_contract {
         }
     };
 }
-
-use pron::adapters::process_runner::ShProcessRunner;
 
 process_runner_contract!(ShProcessRunner::new());
