@@ -1,6 +1,6 @@
 use crate::domain::cron_expr;
 
-#[derive(Debug)]
+#[derive(Debug, Default)]
 pub struct Entry {
     pub expr: cron_expr::CronExpr,
     pub command: String,
