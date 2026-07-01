@@ -119,7 +119,7 @@ mod tests {
                 assert!(ok.is_ok(), "6 parts should succeed: {:?}", ok);
                 assert_eq!(ok.unwrap().len(), 1);
 
-                let err = crate::domain::crontab::parse("0 0 1 1 echo hi\n");
+                let err = crate::domain::crontab::parse("0 0 1 1 echo\n");
                 assert!(err.is_err(), "5 parts should fail");
                 let error = err.unwrap_err().to_string();
                 assert!(
