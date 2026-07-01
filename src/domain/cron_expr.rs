@@ -73,6 +73,38 @@ mod tests {
                 );
             }
         }
+
+        mod if_a_field_value_is_out_of_range {
+            #[test]
+            fn then_a_parse_error_is_returned_naming_the_field_and_value() {
+                let result = crate::domain::cron_expr::parse("60", "*", "*", "*", "*");
+                assert!(result.is_err());
+                let error = result.unwrap_err().to_string();
+                assert!(
+                    error.contains("minute"),
+                    "error should name the field: {error}"
+                );
+                assert!(
+                    error.contains("60"),
+                    "error should name the out-of-range value: {error}"
+                );
+            }
+        }
+            #[test]
+            fn then_a_parse_error_is_returned_naming_the_field_and_value() {
+                let result = crate::domain::cron_expr::parse("not", "*", "*", "*", "*");
+                assert!(result.is_err());
+                let error = result.unwrap_err().to_string();
+                assert!(
+                    error.contains("minute"),
+                    "error should name the field: {error}"
+                );
+                assert!(
+                    error.contains("not"),
+                    "error should name the invalid value: {error}"
+                );
+            }
+        }
     }
 
     mod matches {
