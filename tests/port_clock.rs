@@ -1,11 +1,7 @@
-use pron::application::ports::clock::in_memory::InMemoryClock;
-
 #[macro_export]
 macro_rules! clock_contract {
     ($make:expr) => {
         mod clock_contract {
-            use super::*;
-
             mod now {
                 mod when_called {
                     #[test]
@@ -19,4 +15,4 @@ macro_rules! clock_contract {
     };
 }
 
-clock_contract!(InMemoryClock::with(0, 0, 1, 1, 0));
+clock_contract!(pron::application::ports::clock::in_memory::InMemoryClock::with(0, 0, 1, 1, 0));
