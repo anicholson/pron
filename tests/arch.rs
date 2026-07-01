@@ -3,8 +3,6 @@ use std::path::Path;
 
 mod src {
     mod domain {
-        use super::*;
-
         #[test]
         fn then_domain_does_not_import_from_application_or_adapters() {
             let domain_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src/domain");
@@ -13,8 +11,6 @@ mod src {
     }
 
     mod application {
-        use super::*;
-
         #[test]
         fn then_application_does_not_import_concrete_adapters() {
             let app_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("src/application");
