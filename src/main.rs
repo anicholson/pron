@@ -63,8 +63,8 @@ fn main() {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        let secs_until_tick = (60 - (now % 60)) % 60;
-        let sleep_until = SystemTime::now() + Duration::from_secs(secs_until_tick);
+        let secs_remaining = 60 - (now % 60);
+        let sleep_until = SystemTime::now() + Duration::from_secs(secs_remaining);
         while SystemTime::now() < sleep_until {
             if shutdown.load(Ordering::Relaxed) {
                 let fs = RealFilesystem::new(&cwd);
@@ -76,12 +76,6 @@ fn main() {
 
         if !shutdown.load(Ordering::Relaxed) {
             scheduler.tick();
-            let after = SystemTime::now()
-                .duration_since(UNIX_EPOCH)
-                .unwrap()
-                .as_secs();
-            let secs_to_next = 60 - (after % 60);
-            std::thread::sleep(Duration::from_secs(secs_to_next));
         }
     }
 }
