@@ -101,6 +101,18 @@ fn do_stop(cwd: &Path) {
         }
     };
 
+    if !process_is_alive(pid) {
+        eprintln!("warning: stale pidfile (pid {pid} not alive), removing");
+        let _ = std::fs::remove_file(cwd.join(".pron.pid"));
+        std::process::exit(0);
+    }
+
+    if !looks_like_pron(pid) {
+        eprintln!("warning: stale pidfile (pid {pid} is not pron), removing");
+        let _ = std::fs::remove_file(cwd.join(".pron.pid"));
+        std::process::exit(0);
+    }
+
     unsafe {
         if libc::kill(pid, libc::SIGTERM) != 0 {
             eprintln!("warning: stale pidfile (pid {pid} not alive), removing");
@@ -110,14 +122,37 @@ fn do_stop(cwd: &Path) {
     }
 
     for _ in 0..50 {
-        unsafe {
-            if libc::kill(pid, 0) != 0 {
-                std::process::exit(0);
-            }
+        if !process_is_alive(pid) {
+            std::process::exit(0);
         }
         std::thread::sleep(Duration::from_millis(100));
     }
 
     eprintln!("warning: pid {pid} still alive after 5s");
     std::process::exit(0);
+}
+
+fn process_is_alive(pid: i32) -> bool {
+    unsafe { libc::kill(pid, 0) == 0 }
+}
+
+#[cfg(target_os = "linux")]
+fn looks_like_pron(pid: i32) -> bool {
+    let Ok(cmdline) = std::fs::read(format!("/proc/{pid}/cmdline")) else {
+        return false;
+    };
+    let first = cmdline
+        .split(|&b| b == 0)
+        .next()
+        .unwrap_or(&[]);
+    let basename = Path::new(std::str::from_utf8(first).unwrap_or(""))
+        .file_name()
+        .map(|s| s.to_string_lossy().to_string())
+        .unwrap_or_default();
+    basename.contains("pron")
+}
+
+#[cfg(not(target_os = "linux"))]
+fn looks_like_pron(_pid: i32) -> bool {
+    true
 }
