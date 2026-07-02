@@ -101,6 +101,10 @@ Use-case: scheduler
       then no command is run
     when the clock advances across multiple ticks
       then each matching minute fires a command
+    if the command fails to spawn
+      then the failure is logged
+    if the command exits with a non-zero code
+      then the exit code is logged
 ```
 
 ### Port: Clock (src: src/application/ports/clock.rs; unit: tests/port_clock.rs; integration: none; functional: none)
