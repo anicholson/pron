@@ -69,7 +69,7 @@ fn main() {
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        let secs_remaining = 60 - (now % 60);
+        let secs_remaining = (60 - (now % 60)) % 60;
         let sleep_until = SystemTime::now() + Duration::from_secs(secs_remaining);
         while SystemTime::now() < sleep_until {
             if shutdown.load(Ordering::Relaxed) {
