@@ -1,22 +1,14 @@
-use std::collections::BTreeMap;
+use serde_json::Value;
 use std::io::{self, BufRead};
 
-fn extract_field(line: &str, field: &str) -> Option<String> {
-    let key = format!("\"{field}\":\"");
-    let start = line.find(&key)? + key.len();
-    let rest = &line[start..];
-    let end = rest.find('"')?;
-    Some(rest[..end].to_string())
-}
-
 struct Node {
-    children: BTreeMap<String, Node>,
+    children: Vec<(String, Node)>,
     status: Option<String>,
 }
 
 impl Node {
     fn new() -> Node {
-        Node { children: BTreeMap::new(), status: None }
+        Node { children: Vec::new(), status: None }
     }
 
     fn insert(&mut self, path: &[&str], status: &str) {
@@ -24,10 +16,15 @@ impl Node {
             self.status = Some(status.to_string());
             return;
         }
-        let child = self.children
-            .entry(path[0].to_string())
-            .or_insert_with(Node::new);
-        child.insert(&path[1..], status);
+        let idx = self
+            .children
+            .iter()
+            .position(|(name, _)| name == path[0])
+            .unwrap_or_else(|| {
+                self.children.push((path[0].to_string(), Node::new()));
+                self.children.len() - 1
+            });
+        self.children[idx].1.insert(&path[1..], status);
     }
 
     fn print(&self, indent: usize) {
@@ -60,23 +57,27 @@ fn main() {
         if !line.starts_with('{') {
             continue;
         }
-        let event = match extract_field(&line, "event") {
+        let parsed: Value = match serde_json::from_str(&line) {
+            Ok(v) => v,
+            Err(_) => continue,
+        };
+        let event = match parsed.get("event").and_then(|v| v.as_str()) {
             Some(e) => e,
             None => continue,
         };
         if event == "started" || event == "suite" {
             continue;
         }
-        let name = match extract_field(&line, "name") {
-            Some(n) => n,
+        let name = match parsed.get("name").and_then(|v| v.as_str()) {
+            Some(n) => n.to_string(),
             None => continue,
         };
         let name = name.replace('$', "::");
         let parts: Vec<&str> = name.split("::").collect();
         if parts.len() > 1 {
-            root.insert(&parts[1..], &event);
+            root.insert(&parts[1..], event);
         } else {
-            root.insert(&parts, &event);
+            root.insert(&parts, event);
         }
     }
 
