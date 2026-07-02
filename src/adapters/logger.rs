@@ -3,16 +3,14 @@ use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 
-pub struct RealLogger<'a> {
+pub struct RealLogger {
     log_path: std::path::PathBuf,
-    _marker: std::marker::PhantomData<&'a Path>,
 }
 
-impl<'a> RealLogger<'a> {
-    pub fn new(dir: &'a Path) -> Self {
+impl RealLogger {
+    pub fn new(dir: &Path) -> Self {
         Self {
             log_path: dir.join(".pron.log"),
-            _marker: std::marker::PhantomData,
         }
     }
 
@@ -23,7 +21,7 @@ impl<'a> RealLogger<'a> {
     }
 }
 
-impl<'a> Logger for RealLogger<'a> {
+impl Logger for RealLogger {
     fn log_start(&self, mode: &str, crontab_path: &str, entry_count: usize) {
         self.append(&format!(
             "start mode={} crontab={} entries={}",
