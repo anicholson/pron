@@ -139,5 +139,61 @@ mod tests {
                 assert_eq!(commands[1], "echo hi");
             }
         }
+
+        mod when_the_command_fails_to_spawn {
+            #[test]
+            fn then_the_failure_is_logged() {
+                use crate::application::ports::clock::in_memory::InMemoryClock;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_runner::in_memory::InMemoryProcessRunner;
+                use crate::application::scheduler::Scheduler;
+                use crate::domain::crontab;
+
+                let entries = crontab::parse("* * * * * echo hi\n").unwrap();
+                let clock = InMemoryClock::with(0, 0, 1, 1, 0);
+                let runner = InMemoryProcessRunner::failing_spawn("boom");
+                let logger = InMemoryLogger::default();
+
+                let scheduler = Scheduler::new(clock, runner, logger.clone(), entries);
+                scheduler.tick();
+
+                let events = logger.events.lock().unwrap();
+                let combined = events.join("\n");
+                assert!(
+                    combined.contains("failed to spawn"),
+                    "log should record spawn failure: {combined}"
+                );
+                assert!(
+                    combined.contains("boom"),
+                    "log should contain the error message: {combined}"
+                );
+            }
+        }
+
+        mod when_the_command_exits_with_a_non_zero_code {
+            #[test]
+            fn then_the_exit_code_is_logged() {
+                use crate::application::ports::clock::in_memory::InMemoryClock;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_runner::in_memory::InMemoryProcessRunner;
+                use crate::application::scheduler::Scheduler;
+                use crate::domain::crontab;
+
+                let entries = crontab::parse("* * * * * echo hi\n").unwrap();
+                let clock = InMemoryClock::with(0, 0, 1, 1, 0);
+                let runner = InMemoryProcessRunner::with_exit_status(2);
+                let logger = InMemoryLogger::default();
+
+                let scheduler = Scheduler::new(clock, runner, logger.clone(), entries);
+                scheduler.tick();
+
+                let events = logger.events.lock().unwrap();
+                let combined = events.join("\n");
+                assert!(
+                    combined.contains("job exited with code 2"),
+                    "log should record the non-zero exit code: {combined}"
+                );
+            }
+        }
     }
 }
