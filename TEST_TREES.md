@@ -122,4 +122,35 @@ Port: ProcessRunner
   run
     when called with a command
       then the command is executed and stdout returned
+      and the exit status is returned as zero on success
+```
+
+### Port: Filesystem (src: src/application/ports/filesystem.rs; unit: tests/port_filesystem.rs; integration: none; functional: none)
+```
+Port: Filesystem
+  write_pidfile
+    when called with a pid
+      then the pid is retrievable
+  remove_pidfile
+    when called after a write
+      then the pid is no longer retrievable
+```
+
+### Port: Logger (src: src/application/ports/logger.rs; unit: tests/port_logger.rs; integration: none; functional: none)
+```
+Port: Logger
+  log_start
+    when called with a mode, a crontab path, and an entry count
+      then a start event containing the mode and entry count is recorded
+  log_job
+    when called with a command and output
+      then begin and end markers with the command and output are recorded
+```
+
+### Port: ProcessControl (src: src/application/ports/process_control.rs; unit: tests/port_process_control.rs; integration: none; functional: none)
+```
+Port: ProcessControl
+  current_pid
+    when called
+      then it returns the expected pid
 ```
