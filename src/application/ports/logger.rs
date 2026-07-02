@@ -1,6 +1,8 @@
 pub trait Logger: Send + Sync {
     fn log_start(&self, mode: &str, crontab_path: &str, entry_count: usize);
     fn log_job(&self, command: &str, output: &str);
+    fn log_job_exit(&self, command: &str, exit_status: i32);
+    fn log_spawn_failure(&self, command: &str, error: &str);
 }
 
 #[cfg(any(test, feature = "test-support"))]
@@ -25,6 +27,20 @@ pub mod in_memory {
             self.events.lock().unwrap().push(format!(
                 "--- begin: {} ---\n{}\n--- end: {} ---",
                 command, output, command
+            ));
+        }
+
+        fn log_job_exit(&self, command: &str, exit_status: i32) {
+            self.events.lock().unwrap().push(format!(
+                "job exited with code {}: {}",
+                exit_status, command
+            ));
+        }
+
+        fn log_spawn_failure(&self, command: &str, error: &str) {
+            self.events.lock().unwrap().push(format!(
+                "failed to spawn: {}: {}",
+                command, error
             ));
         }
     }
