@@ -36,4 +36,12 @@ impl Logger for RealLogger {
         }
         self.append(&format!("--- end: {} ---", command));
     }
+
+    fn log_job_exit(&self, command: &str, exit_status: i32) {
+        self.append(&format!("job exited with code {}: {}", exit_status, command));
+    }
+
+    fn log_spawn_failure(&self, command: &str, error: &str) {
+        self.append(&format!("failed to spawn: {}: {}", command, error));
+    }
 }
