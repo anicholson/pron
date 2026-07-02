@@ -23,6 +23,20 @@ Journey: scheduled-dev-tasks
     then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
 ```
 
+### System: pron-stop (functional: tests/journey_pron.rs)
+```
+System: pron-stop
+  when the pidfile names a stale pid (process no longer alive)
+    then the pidfile is removed and pron stop exits 0
+  where /proc is available
+    when the pidfile names a reused pid whose cmdline is not pron
+      then the pidfile is removed and pron stop exits 0 without signalling
+  when the pidfile names a live pron daemon
+    then SIGTERM is delivered and the daemon removes the pidfile and exits cleanly
+  if the pid still owns no process after 5s
+    then pron stop warns and exits 0
+```
+
 ### Domain: Crontab (src: src/domain/crontab.rs; unit: src/domain/crontab.rs; integration: none; functional: none)
 ```
 Domain: Crontab
