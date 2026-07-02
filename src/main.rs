@@ -59,27 +59,29 @@ fn main() {
     let scheduler = Scheduler::new(clock, runner, log_for_scheduler, entries);
 
     loop {
-        if shutdown.load(Ordering::Relaxed) {
-            let fs = RealFilesystem::new(&cwd);
-            let _ = fs.remove_pidfile();
-            std::process::exit(0);
-        }
-
         let now = SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .unwrap()
             .as_secs();
-        let secs_remaining = (60 - (now % 60)) % 60;
-        let sleep_until = SystemTime::now() + Duration::from_secs(secs_remaining);
+        let secs_until_tick = (60 - (now % 60)) % 60;
+        let sleep_until = SystemTime::now() + Duration::from_secs(secs_until_tick);
         while SystemTime::now() < sleep_until {
             if shutdown.load(Ordering::Relaxed) {
-                break;
+                let fs = RealFilesystem::new(&cwd);
+                let _ = fs.remove_pidfile();
+                std::process::exit(0);
             }
             std::thread::sleep(Duration::from_millis(200));
         }
 
         if !shutdown.load(Ordering::Relaxed) {
             scheduler.tick();
+            let after = SystemTime::now()
+                .duration_since(UNIX_EPOCH)
+                .unwrap()
+                .as_secs();
+            let secs_to_next = 60 - (after % 60);
+            std::thread::sleep(Duration::from_secs(secs_to_next));
         }
     }
 }
