@@ -13,6 +13,7 @@
 - tick — a scheduler wake at a minute boundary.
 - pidfile — `.pron.pid`; records the running pid and enforces single-instance.
 - foreground mode / daemon mode — pron's two run modes; both run the scheduler loop and log to `.pron.log` and write `.pron.pid`. The `-d` flag currently selects the same code path as foreground (daemonization is not yet implemented).
+- stale pidfile — `.pron.pid` whose recorded pid no longer points to a live pron process; `pron stop` detects this via `/proc/{pid}/cmdline` (Linux) and removes the file without signalling.
 
 ## Bounded Contexts
 
