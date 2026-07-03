@@ -65,6 +65,16 @@ Domain: CronExpr
       then a parse error is returned naming the field and value
     if a field value is out of range
       then a parse error is returned naming the field and value
+    when a field is a step expression
+      then only every Nth value in the valid range is set
+    when a field is a range expression
+      then every value in the inclusive range is set
+    when a field is a list expression
+      then every listed element is set
+    when a field combines ranges and lists
+      then the union of all elements is set
+    if a step expression has an invalid step
+      then a parse error is returned naming the field
   matches
     when called with a tuple that matches a fully numeric expression
       then true is returned
