@@ -74,6 +74,19 @@ mod tests {
             }
         }
 
+        mod when_a_field_is_a_step_expression {
+            #[test]
+            fn then_only_every_nth_value_in_the_valid_range_is_set() {
+                let expr = crate::domain::cron_expr::parse("*/15", "*", "*", "*", "*").unwrap();
+                assert!(crate::domain::cron_expr::matches(&expr, 0, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 15, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 30, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 45, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 10, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 59, 0, 1, 1, 0));
+            }
+        }
+
         mod if_a_field_value_is_out_of_range {
             #[test]
             fn then_a_parse_error_is_returned_naming_the_field_and_value() {
