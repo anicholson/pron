@@ -17,6 +17,14 @@ impl std::fmt::Display for ParseError {
 }
 
 fn parse_field(s: &str, min: u32, max: u32, name: &str) -> Result<u64, ParseError> {
+    let mut bits = 0u64;
+    for element in s.split(',') {
+        bits |= parse_element(element, min, max, name)?;
+    }
+    Ok(bits)
+}
+
+fn parse_element(s: &str, min: u32, max: u32, name: &str) -> Result<u64, ParseError> {
     if let Some(step_str) = s.strip_prefix("*/") {
         let step: u32 = step_str.parse().map_err(|_| {
             ParseError(format!("{} field: invalid step '{}'", name, s))
