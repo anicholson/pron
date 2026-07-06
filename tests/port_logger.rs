@@ -48,6 +48,48 @@ macro_rules! logger_contract {
                     }
                 }
             }
+            mod log_job_exit {
+                mod when_called_with_a_command_and_a_non_zero_exit_status {
+                    #[test]
+                    fn then_an_exit_code_line_naming_the_command_and_code_is_recorded() {
+                        use pron::application::ports::logger::Logger;
+                        let (logger, read) = $setup;
+                        logger.log_job_exit("false", 1);
+                        let recorded = read();
+                        assert!(
+                            recorded.contains("exited with code 1"),
+                            "expected exit-code line in recorded output: {recorded}"
+                        );
+                        assert!(
+                            recorded.contains("false"),
+                            "expected command name in recorded output: {recorded}"
+                        );
+                    }
+                }
+            }
+            mod log_spawn_failure {
+                mod when_called_with_a_command_and_an_error {
+                    #[test]
+                    fn then_a_spawn_failure_line_naming_the_command_and_error_is_recorded() {
+                        use pron::application::ports::logger::Logger;
+                        let (logger, read) = $setup;
+                        logger.log_spawn_failure("missing-cmd", "not found");
+                        let recorded = read();
+                        assert!(
+                            recorded.contains("failed to spawn"),
+                            "expected spawn-failure line in recorded output: {recorded}"
+                        );
+                        assert!(
+                            recorded.contains("missing-cmd"),
+                            "expected command name in recorded output: {recorded}"
+                        );
+                        assert!(
+                            recorded.contains("not found"),
+                            "expected error text in recorded output: {recorded}"
+                        );
+                    }
+                }
+            }
         }
     };
 }
