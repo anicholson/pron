@@ -65,6 +65,7 @@ Domain: CronExpr
       then a parse error is returned naming the field and value
     if a field value is out of range
       then a parse error is returned naming the field and value
+      and a parse error is returned for a range with an out-of-range endpoint
     when a field is a step expression
       then only every Nth value in the valid range is set
     when a field is a range expression
