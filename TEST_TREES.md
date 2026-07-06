@@ -39,6 +39,20 @@ System: pron-stop
 
 **Declared gap:** the `if the pid is still alive after 5s` path is untested — it requires a pron daemon stuck in a long job that ignores SIGTERM, a >5s scenario that's fragile to simulate. The implementation in `src/main.rs:do_stop` has the polling loop and warning; the contract documents the intent.
 
+### System: foreground-mode (functional: tests/system_foreground.rs)
+```
+System: foreground-mode
+  when pron is started without -d
+    then .pron.pid is written
+    then the start event is printed to stdout
+    then no .pron.log is created
+    when a minute boundary is crossed
+      then the job's command runs in the working directory
+      then the command's output flows to stdout with no markers
+  when pron stop is invoked
+    then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
+```
+
 ### Domain: Crontab (src: src/domain/crontab.rs; unit: src/domain/crontab.rs; integration: none; functional: none)
 ```
 Domain: Crontab
