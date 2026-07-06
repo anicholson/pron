@@ -108,6 +108,18 @@ mod tests {
             }
         }
 
+        mod when_a_field_is_a_list_expression {
+            #[test]
+            fn then_every_listed_element_is_set() {
+                let expr = crate::domain::cron_expr::parse("5,15,30", "*", "*", "*", "*").unwrap();
+                assert!(crate::domain::cron_expr::matches(&expr, 5, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 15, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 30, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 6, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 31, 0, 1, 1, 0));
+            }
+        }
+
         mod when_a_field_is_a_range_expression {
             #[test]
             fn then_every_value_in_the_inclusive_range_is_set() {
