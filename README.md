@@ -20,7 +20,9 @@ pron -d                              # run the scheduler loop (writes .pron.pid,
 pron stop                            # stop the running pron (SIGTERM) and remove .pron.pid
 ```
 
-`-d` / `--daemon` selects daemon mode (the label recorded in the start event); the scheduler loop runs in the invoking process and logs to `.pron.log` in both modes.
+`pron` runs in the foreground, printing the start event and command output to stdout.
+`pron -d` / `--daemon` selects daemon mode, logging the same content to `.pron.log` instead.
+Both modes write `.pron.pid` so `pron stop` works either way.
 
 ## Develop
 
