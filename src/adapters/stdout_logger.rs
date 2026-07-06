@@ -25,7 +25,7 @@ impl Logger for StdoutLogger {
         );
     }
 
-    fn log_job(&self, command: &str, output: &str) {
+    fn log_job(&self, _command: &str, output: &str) {
         let mut out = std::io::stdout().lock();
         if !output.is_empty() {
             let _ = write!(out, "{}", output);
