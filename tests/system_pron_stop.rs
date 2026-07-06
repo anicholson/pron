@@ -35,6 +35,8 @@ mod where_proc_is_available {
     use super::*;
 
     mod when_the_pidfile_names_a_reused_pid_whose_cmdline_is_not_pron {
+        use super::*;
+
         #[test]
         fn then_the_pidfile_is_removed_and_pron_stop_exits_zero_without_signalling() {
             let dir = tempfile::tempdir().unwrap();
