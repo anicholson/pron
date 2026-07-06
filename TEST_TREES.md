@@ -23,7 +23,7 @@ Journey: scheduled-dev-tasks
     then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
 ```
 
-### System: pron-stop (functional: tests/journey_pron.rs)
+### System: pron-stop (functional: tests/system_pron_stop.rs)
 ```
 System: pron-stop
   when the pidfile names a stale pid (process no longer alive)
@@ -33,7 +33,7 @@ System: pron-stop
       then the pidfile is removed and pron stop exits 0 without signalling
   when the pidfile names a live pron daemon
     then SIGTERM is delivered and the daemon removes the pidfile and exits cleanly
-  if the pid still owns no process after 5s
+  if the pid is still alive after 5s
     then pron stop warns and exits 0
 ```
 
