@@ -159,3 +159,58 @@ mod when_pron_is_started_without_d {
         }
     }
 }
+
+mod when_pron_stop_is_invoked {
+    use super::*;
+
+    #[test]
+    fn then_the_daemon_receives_sigterm_and_pron_pid_is_removed_and_the_daemon_exits_cleanly() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let mut child = Command::new(pron)
+            .current_dir(dir.path())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+
+        thread::sleep(Duration::from_millis(500));
+        assert!(
+            dir.path().join(".pron.pid").exists(),
+            "foreground pron should be running with pidfile"
+        );
+
+        let stop_output = Command::new(pron)
+            .arg("stop")
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+
+        assert!(
+            stop_output.status.success(),
+            "pron stop should succeed, stderr: {}",
+            String::from_utf8_lossy(&stop_output.stderr)
+        );
+
+        let mut exited = None;
+        for _ in 0..100 {
+            if let Ok(Some(status)) = child.try_wait() {
+                exited = Some(status);
+                break;
+            }
+            thread::sleep(Duration::from_millis(100));
+        }
+        let status = exited.expect("foreground pron should exit within 10s of pron stop");
+        assert!(
+            status.success(),
+            "foreground pron should exit cleanly (exit 0), got {status}"
+        );
+
+        assert!(
+            !dir.path().join(".pron.pid").exists(),
+            ".pron.pid should be removed on clean shutdown"
+        );
+    }
+}
