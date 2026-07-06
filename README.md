@@ -16,7 +16,8 @@ Place a `.prontab` in the working directory, one job per line as `min hour dom m
 
 ```sh
 echo "* * * * * echo hi" > .prontab   # one job per line: min hour dom mon dow command
-pron -d                              # run the scheduler loop (writes .pron.pid, logs to .pron.log)
+pron                                  # run in foreground (output to stdout)
+pron -d                              # run in daemon mode (logs to .pron.log)
 pron stop                            # stop the running pron (SIGTERM) and remove .pron.pid
 ```
 
