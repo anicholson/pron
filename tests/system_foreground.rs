@@ -135,6 +135,9 @@ mod when_pron_is_started_without_d {
             let wait = super::super::seconds_until_next_minute() + 3;
             thread::sleep(Duration::from_secs(wait));
 
+            child.kill().unwrap();
+            let _ = child.wait();
+
             let mut stdout = String::new();
             if let Some(mut out) = child.stdout.take() {
                 use std::io::Read;
@@ -153,9 +156,6 @@ mod when_pron_is_started_without_d {
                 !stdout.contains("--- end:"),
                 "stdout should NOT contain end markers in foreground mode, got: {stdout}"
             );
-
-            child.kill().unwrap();
-            let _ = child.wait();
         }
     }
 }
