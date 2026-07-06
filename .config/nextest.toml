@@ -10,6 +10,10 @@ success-output = "never"
 filter = 'binary(journey_pron)'
 slow-timeout = { period = "300s", terminate-after = 2 }
 
+[[profile.default.overrides]]
+filter = 'binary(system_foreground)'
+slow-timeout = { period = "300s", terminate-after = 2 }
+
 [profile.ci]
 retries = 3
 fail-fast = false
