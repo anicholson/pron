@@ -52,6 +52,9 @@ mod when_pron_is_started_without_d {
 
         thread::sleep(Duration::from_millis(500));
 
+        child.kill().unwrap();
+        let _ = child.wait();
+
         let mut stdout = String::new();
         if let Some(mut out) = child.stdout.take() {
             use std::io::Read;
@@ -62,9 +65,6 @@ mod when_pron_is_started_without_d {
             stdout.contains("start"),
             "stdout should contain the start event, got: {stdout}"
         );
-
-        child.kill().unwrap();
-        let _ = child.wait();
     }
 
     #[test]
