@@ -89,6 +89,18 @@ mod tests {
             }
         }
 
+        mod when_a_field_is_a_range_expression {
+            #[test]
+            fn then_every_value_in_the_inclusive_range_is_set() {
+                let expr = crate::domain::cron_expr::parse("10-12", "*", "*", "*", "*").unwrap();
+                assert!(crate::domain::cron_expr::matches(&expr, 10, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 11, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 12, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 9, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 13, 0, 1, 1, 0));
+            }
+        }
+
         mod when_a_field_is_a_step_expression {
             #[test]
             fn then_only_every_nth_value_in_the_valid_range_is_set() {
