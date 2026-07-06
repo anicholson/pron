@@ -37,6 +37,8 @@ System: pron-stop
     then pron stop warns and exits 0
 ```
 
+**Declared gap:** the `if the pid is still alive after 5s` path is untested — it requires a pron daemon stuck in a long job that ignores SIGTERM, a >5s scenario that's fragile to simulate. The implementation in `src/main.rs:do_stop` has the polling loop and warning; the contract documents the intent.
+
 ### Domain: Crontab (src: src/domain/crontab.rs; unit: src/domain/crontab.rs; integration: none; functional: none)
 ```
 Domain: Crontab
