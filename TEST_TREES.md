@@ -70,6 +70,8 @@ Domain: CronExpr
       then only every Nth value in the valid range is set
     when a field is a range expression
       then every value in the inclusive range is set
+      and endpoints at the field minimum and maximum are accepted
+      and a single-element range is accepted
     when a field is a list expression
       then every listed element is set
     when a field combines ranges and lists
