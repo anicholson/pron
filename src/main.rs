@@ -8,7 +8,9 @@ use pron::adapters::fs::RealFilesystem;
 use pron::adapters::logger::RealLogger;
 use pron::adapters::process_control::RealProcessControl;
 use pron::adapters::process_runner::ShProcessRunner;
+use pron::adapters::stdout_logger::StdoutLogger;
 use pron::application::ports::filesystem::Filesystem;
+use pron::application::ports::logger::Logger;
 use pron::application::scheduler::Scheduler;
 use pron::application::start::Start;
 
