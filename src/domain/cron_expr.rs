@@ -116,6 +116,23 @@ mod tests {
             }
         }
 
+        mod if_a_step_expression_has_an_invalid_step {
+            #[test]
+            fn then_a_parse_error_is_returned_naming_the_field() {
+                let result = crate::domain::cron_expr::parse("*/0", "*", "*", "*", "*");
+                assert!(result.is_err());
+                let error = result.unwrap_err().to_string();
+                assert!(
+                    error.contains("minute"),
+                    "error should name the field: {error}"
+                );
+                assert!(
+                    error.contains("step"),
+                    "error should name the step: {error}"
+                );
+            }
+        }
+
         mod when_a_field_combines_ranges_and_lists {
             #[test]
             fn then_the_union_of_all_elements_is_set() {
