@@ -1,4 +1,4 @@
-pub trait Logger: Send + Sync {
+pub trait Logger: Send + Sync + ?Sized {
     fn log_start(&self, mode: &str, crontab_path: &str, entry_count: usize);
     fn log_job(&self, command: &str, output: &str);
     fn log_job_exit(&self, command: &str, exit_status: i32);
