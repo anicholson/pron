@@ -204,6 +204,21 @@ mod tests {
                     "error should name the out-of-range value: {error}"
                 );
             }
+
+            #[test]
+            fn and_a_parse_error_is_returned_for_a_range_with_an_out_of_range_endpoint() {
+                let result = crate::domain::cron_expr::parse("70-80", "*", "*", "*", "*");
+                assert!(result.is_err());
+                let error = result.unwrap_err().to_string();
+                assert!(
+                    error.contains("minute"),
+                    "error should name the field: {error}"
+                );
+                assert!(
+                    error.contains("70-80"),
+                    "error should name the out-of-range range: {error}"
+                );
+            }
         }
     }
 
