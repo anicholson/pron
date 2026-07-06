@@ -39,6 +39,25 @@ fn parse_field(s: &str, min: u32, max: u32, name: &str) -> Result<u64, ParseErro
         }
         return Ok(bits);
     }
+    if let Some((lo_s, hi_s)) = s.split_once('-') {
+        let lo: u32 = lo_s.parse().map_err(|_| {
+            ParseError(format!("{} field: invalid value '{}'", name, s))
+        })?;
+        let hi: u32 = hi_s.parse().map_err(|_| {
+            ParseError(format!("{} field: invalid value '{}'", name, s))
+        })?;
+        if lo < min || hi > max || lo > hi {
+            return Err(ParseError(format!(
+                "{} field: invalid value '{}'",
+                name, s
+            )));
+        }
+        let mut bits = 0u64;
+        for v in lo..=hi {
+            bits |= 1 << v;
+        }
+        return Ok(bits);
+    }
     match s.parse::<u32>() {
         Ok(v) if (min..=max).contains(&v) => Ok(1 << v),
         _ => Err(ParseError(format!("{} field: invalid value '{}'", name, s))),
