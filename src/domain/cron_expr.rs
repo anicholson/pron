@@ -116,6 +116,25 @@ mod tests {
             }
         }
 
+        mod when_a_field_combines_ranges_and_lists {
+            #[test]
+            fn then_the_union_of_all_elements_is_set() {
+                let expr = crate::domain::cron_expr::parse("1-5,10", "*", "*", "*", "*").unwrap();
+                for m in [1, 2, 3, 4, 5, 10] {
+                    assert!(
+                        crate::domain::cron_expr::matches(&expr, m, 0, 1, 1, 0),
+                        "minute {m} should match"
+                    );
+                }
+                for m in [0, 6, 9, 11, 30, 59] {
+                    assert!(
+                        !crate::domain::cron_expr::matches(&expr, m, 0, 1, 1, 0),
+                        "minute {m} should NOT match"
+                    );
+                }
+            }
+        }
+
         mod when_a_field_is_a_list_expression {
             #[test]
             fn then_every_listed_element_is_set() {
