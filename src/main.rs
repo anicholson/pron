@@ -39,15 +39,27 @@ fn main() {
     let mode = if daemon { "daemon" } else { "foreground" };
 
     let fs = RealFilesystem::new(&cwd);
-    let logger = RealLogger::new(&cwd);
     let proc = RealProcessControl::new();
-    let start = Start::new(fs, logger, proc);
 
-    let entries = match start.execute(&content, mode) {
-        Ok(e) => e,
-        Err(e) => {
-            eprintln!("error: {e}");
-            std::process::exit(1);
+    let entries = if daemon {
+        let logger = RealLogger::new(&cwd);
+        let start = Start::new(fs, logger, proc);
+        match start.execute(&content, mode) {
+            Ok(e) => e,
+            Err(e) => {
+                eprintln!("error: {e}");
+                std::process::exit(1);
+            }
+        }
+    } else {
+        let logger = StdoutLogger::new();
+        let start = Start::new(fs, logger, proc);
+        match start.execute(&content, mode) {
+            Ok(e) => e,
+            Err(e) => {
+                eprintln!("error: {e}");
+                std::process::exit(1);
+            }
         }
     };
 
@@ -57,8 +69,12 @@ fn main() {
 
     let clock = SystemClock::new();
     let runner = ShProcessRunner::new();
-    let log_for_scheduler = RealLogger::new(&cwd);
-    let scheduler = Scheduler::new(clock, runner, log_for_scheduler, entries);
+    let scheduler_logger: Box<dyn Logger> = if daemon {
+        Box::new(RealLogger::new(&cwd))
+    } else {
+        Box::new(StdoutLogger::new())
+    };
+    let scheduler = Scheduler::new(clock, runner, scheduler_logger, entries);
 
     loop {
         let now = SystemTime::now()
