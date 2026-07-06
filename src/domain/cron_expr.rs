@@ -174,6 +174,22 @@ mod tests {
                 assert!(!crate::domain::cron_expr::matches(&expr, 9, 0, 1, 1, 0));
                 assert!(!crate::domain::cron_expr::matches(&expr, 13, 0, 1, 1, 0));
             }
+
+            #[test]
+            fn and_endpoints_at_the_field_minimum_and_maximum_are_accepted() {
+                let expr = crate::domain::cron_expr::parse("0-59", "*", "*", "*", "*").unwrap();
+                assert!(crate::domain::cron_expr::matches(&expr, 0, 0, 1, 1, 0));
+                assert!(crate::domain::cron_expr::matches(&expr, 59, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 60, 0, 1, 1, 0));
+            }
+
+            #[test]
+            fn and_a_single_element_range_is_accepted() {
+                let expr = crate::domain::cron_expr::parse("5-5", "*", "*", "*", "*").unwrap();
+                assert!(crate::domain::cron_expr::matches(&expr, 5, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 4, 0, 1, 1, 0));
+                assert!(!crate::domain::cron_expr::matches(&expr, 6, 0, 1, 1, 0));
+            }
         }
 
         mod when_a_field_is_a_step_expression {
