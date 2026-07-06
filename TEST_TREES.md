@@ -158,6 +158,12 @@ Port: Logger
   log_job
     when called with a command and output
       then begin and end markers with the command and output are recorded
+  log_job_exit
+    when called with a command and a non-zero exit status
+      then an exit-code line naming the command and code is recorded
+  log_spawn_failure
+    when called with a command and an error
+      then a spawn-failure line naming the command and error is recorded
 ```
 
 ### Port: ProcessControl (src: src/application/ports/process_control.rs; unit: tests/port_process_control.rs; integration: none; functional: none)
