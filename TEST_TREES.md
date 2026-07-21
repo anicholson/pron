@@ -174,6 +174,15 @@ Use-case: start
     when called with a valid crontab and daemon mode
       then the pidfile is written with the current pid
       then a start event is logged
+    when called while a live pron process holds the pidfile
+      then an error naming the holding pid is returned
+      and the pidfile is unchanged
+      and no start event is logged
+    when called while the pidfile names a stale pid
+      then the pidfile is replaced with the current pid
+      then a start event is logged
+    if the pidfile cannot be parsed
+      then an error is returned and the pidfile is unchanged
     if called with an invalid crontab
       then a parse error is returned without writing the pidfile
 ```
