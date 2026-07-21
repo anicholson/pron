@@ -85,6 +85,27 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
     use super::*;
 
     #[test]
+    fn then_pron_d_exits_zero_once_the_daemon_is_ready() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let _guard = DaemonGuard::new(dir.path());
+        let mut child = start_daemon(dir.path());
+
+        let status = wait_for_exit(&mut child, Duration::from_secs(5))
+            .expect("pron -d should exit once the daemon is ready");
+        assert!(
+            status.success(),
+            "pron -d should exit 0 once the daemon is ready, got {status}"
+        );
+
+        assert!(
+            dir.path().join(".pron.pid").exists(),
+            ".pron.pid should be written once the daemon is ready"
+        );
+    }
+
+    #[test]
     fn then_pron_pid_is_written_naming_the_daemons_pid() {
         let dir = tempfile::tempdir().unwrap();
         fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
