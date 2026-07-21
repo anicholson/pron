@@ -28,5 +28,6 @@
 - A hand-written 5-field cron parser; the `cron` crate is 7-field with named days/months and a heavier dependency tree.
 - Plain std threads plus `signal-hook`; the workload is sleep-match-spawn-wait, so an async runtime would add footprint without benefit.
 - Civil date from epoch computed via Howard Hinnant's algorithm (no `chrono` or `time` dependency); the clock adapter derives dom/mon/dow from raw seconds.
+- Single fork + `setsid` for daemonization, with a readiness pipe from child to launcher: the launcher reports exactly what the daemon reports at startup, and `pron stop` always has the right pid. Double-fork (to bar reacquiring a controlling terminal) is needless ceremony for a folder-scoped dev tool.
 
 ## Temporal View
