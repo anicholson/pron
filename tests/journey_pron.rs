@@ -156,12 +156,11 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
             let dir = tempfile::tempdir().unwrap();
             fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
 
-            let pron = env!("CARGO_BIN_EXE_pron");
-            let mut child = Command::new(pron)
-                .arg("-d")
-                .current_dir(dir.path())
-                .spawn()
-                .unwrap();
+            let _guard = DaemonGuard::new(dir.path());
+            let mut child = start_daemon(dir.path());
+            let status = wait_for_exit(&mut child, Duration::from_secs(5))
+                .expect("pron -d should exit once the daemon is ready");
+            assert!(status.success(), "pron -d should exit 0, got {status}");
 
             let wait = super::super::seconds_until_next_minute() + 3;
             thread::sleep(Duration::from_secs(wait));
@@ -179,9 +178,6 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
                 log.contains("--- end:"),
                 ".pron.log should contain an end marker, got: {log}"
             );
-
-            child.kill().unwrap();
-            let _ = child.wait();
         }
     }
 
