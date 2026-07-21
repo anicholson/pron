@@ -11,7 +11,7 @@
 - crontab — the `.prontab` file; one job per line as `min hour dom mon dow command`.
 - entry — a parsed crontab line: a cron expression paired with a command.
 - tick — a scheduler wake at a minute boundary.
-- pidfile — `.pron.pid`; records the running pid and enforces single-instance.
+- pidfile — `.pron.pid`; records the running pid so `pron stop` can find it. Starting a second pron overwrites it — single-instance is not enforced.
 - foreground mode / daemon mode — pron's two run modes; both write `.pron.pid`. Foreground prints the start event and command output to stdout (no markers, no `.pron.log`); daemon logs both to `.pron.log`. The `-d` flag selects daemon mode: pron forks, the child detaches into its own session (`setsid`, std fds to `/dev/null`), and the launcher exits 0 only once the daemon signals readiness (pidfile written naming the daemon's pid, start event logged) over a pipe — so startup failures stay synchronous and scriptable.
 - stale pidfile — `.pron.pid` whose recorded pid no longer points to a live pron process; `pron stop` detects this via `/proc/{pid}/cmdline` (Linux) and removes the file without signalling.
 
