@@ -97,4 +97,23 @@ mod when_pron_d_is_started_with_a_valid_prontab {
         let alive = unsafe { libc::kill(daemon_pid as i32, 0) == 0 };
         assert!(alive, "the daemon (pid {daemon_pid}) should be running");
     }
+
+    #[test]
+    fn and_pron_log_is_appended_to_with_a_start_event() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let _guard = DaemonGuard::new(dir.path());
+        let mut child = start_daemon(dir.path());
+
+        let status = wait_for_exit(&mut child, Duration::from_secs(5))
+            .expect("pron -d should exit once the daemon is ready");
+        assert!(status.success(), "pron -d should exit 0, got {status}");
+
+        let log = fs::read_to_string(dir.path().join(".pron.log")).unwrap();
+        assert!(
+            log.contains("start"),
+            ".pron.log should contain a start event, got: {log}"
+        );
+    }
 }
