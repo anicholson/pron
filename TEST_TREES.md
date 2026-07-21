@@ -225,6 +225,13 @@ Port: ProcessRunner
 ### Port: Filesystem (src: src/application/ports/filesystem.rs; unit: tests/port_filesystem.rs; integration: none; functional: none)
 ```
 Port: Filesystem
+  read_pidfile
+    when no pidfile has been written
+      then none is returned
+    when called after a write
+      then the written pid is returned
+    if the pidfile content is invalid
+      then an error is returned
   write_pidfile
     when called with a pid
       then the pid is retrievable
