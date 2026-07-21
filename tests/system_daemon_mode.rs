@@ -118,6 +118,49 @@ mod when_pron_d_is_started_with_a_valid_prontab {
     }
 }
 
+mod when_pron_stop_is_invoked {
+    use super::*;
+
+    #[test]
+    fn then_the_daemon_receives_sigterm_and_pron_pid_is_removed_and_the_daemon_exits_cleanly() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let _guard = DaemonGuard::new(dir.path());
+        let mut child = start_daemon(dir.path());
+        let status = wait_for_exit(&mut child, Duration::from_secs(5))
+            .expect("pron -d should exit once the daemon is ready");
+        assert!(status.success(), "pron -d should exit 0, got {status}");
+
+        let pid_str = fs::read_to_string(dir.path().join(".pron.pid")).unwrap();
+        let daemon_pid: i32 = pid_str.trim().parse().unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let stop_output = Command::new(pron)
+            .arg("stop")
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+
+        assert!(
+            stop_output.status.success(),
+            "pron stop should succeed, stderr: {}",
+            String::from_utf8_lossy(&stop_output.stderr)
+        );
+
+        assert!(
+            !dir.path().join(".pron.pid").exists(),
+            ".pron.pid should be removed on clean shutdown"
+        );
+
+        let daemon_alive = unsafe { libc::kill(daemon_pid, 0) == 0 };
+        assert!(
+            !daemon_alive,
+            "the daemon (pid {daemon_pid}) should have exited after SIGTERM"
+        );
+    }
+}
+
 mod if_the_prontab_has_a_syntax_error {
     use super::*;
 
