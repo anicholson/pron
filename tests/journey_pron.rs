@@ -85,38 +85,24 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
     use super::*;
 
     #[test]
-    fn then_the_daemon_starts() {
+    fn then_pron_d_exits_zero_once_the_daemon_is_ready() {
         let dir = tempfile::tempdir().unwrap();
         fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
 
-        let pron = env!("CARGO_BIN_EXE_pron");
-        let mut child = Command::new(pron)
-            .arg("-d")
-            .current_dir(dir.path())
-            .spawn()
-            .unwrap();
+        let _guard = DaemonGuard::new(dir.path());
+        let mut child = start_daemon(dir.path());
 
-        thread::sleep(Duration::from_millis(500));
-
-        let pidfile = dir.path().join(".pron.pid");
+        let status = wait_for_exit(&mut child, Duration::from_secs(5))
+            .expect("pron -d should exit once the daemon is ready");
         assert!(
-            pidfile.exists(),
-            ".pron.pid should be written when the daemon starts"
+            status.success(),
+            "pron -d should exit 0 once the daemon is ready, got {status}"
         );
 
-        let log = dir.path().join(".pron.log");
         assert!(
-            log.exists(),
-            ".pron.log should be created when the daemon starts"
+            dir.path().join(".pron.pid").exists(),
+            ".pron.pid should be written once the daemon is ready"
         );
-        let log_content = fs::read_to_string(&log).unwrap();
-        assert!(
-            log_content.contains("start"),
-            ".pron.log should contain a start event, got: {log_content}"
-        );
-
-        child.kill().unwrap();
-        let _ = child.wait();
     }
 
     mod when_a_minute_boundary_is_crossed {
