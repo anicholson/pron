@@ -101,8 +101,9 @@ fn main() {
 fn do_stop(cwd: &Path) {
     let pid_str = match std::fs::read_to_string(cwd.join(".pron.pid")) {
         Ok(s) => s,
-        Err(_) => {
-            std::process::exit(0);
+        Err(e) => {
+            eprintln!("error: cannot read .pron.pid: {e}");
+            std::process::exit(1);
         }
     };
 
