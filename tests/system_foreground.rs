@@ -160,6 +160,53 @@ mod when_pron_is_started_without_d {
     }
 }
 
+mod when_sigint_is_received {
+    use super::*;
+
+    #[test]
+    fn then_pron_pid_is_removed_and_pron_exits_cleanly() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let mut child = Command::new(pron)
+            .current_dir(dir.path())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+
+        thread::sleep(Duration::from_millis(500));
+        assert!(
+            dir.path().join(".pron.pid").exists(),
+            "foreground pron should be running with pidfile"
+        );
+
+        unsafe {
+            libc::kill(child.id() as i32, libc::SIGINT);
+        }
+
+        let mut exited = None;
+        for _ in 0..100 {
+            if let Ok(Some(status)) = child.try_wait() {
+                exited = Some(status);
+                break;
+            }
+            thread::sleep(Duration::from_millis(100));
+        }
+        let status = exited.expect("foreground pron should exit within 10s of SIGINT");
+        assert!(
+            status.success(),
+            "foreground pron should exit cleanly on SIGINT (exit 0), got {status}"
+        );
+
+        assert!(
+            !dir.path().join(".pron.pid").exists(),
+            ".pron.pid should be removed on SIGINT shutdown"
+        );
+    }
+}
+
 mod when_pron_stop_is_invoked {
     use super::*;
 
