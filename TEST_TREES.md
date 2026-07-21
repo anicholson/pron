@@ -11,14 +11,14 @@ Journey: scheduled-dev-tasks
     then pron refuses to start and reports the parse error
   when the .prontab is fixed with a valid per-minute job and pron -d is started
     then pron -d exits 0 once the daemon is ready
-      then .pron.pid is written naming the daemon's pid
-      then .pron.log is appended to with a start event
-      when a minute boundary is crossed
-        then the job's command runs in the working directory
-        then the command's output appears in .pron.log between begin and end markers
-      when another minute boundary is crossed
-        then the job runs a second time
-        and .pron.log shows a second set of begin and end markers
+    then .pron.pid is written naming the daemon's pid
+    then .pron.log is appended to with a start event
+    when a minute boundary is crossed
+      then the job's command runs in the working directory
+      then the command's output appears in .pron.log between begin and end markers
+    when another minute boundary is crossed
+      then the job runs a second time
+      and .pron.log shows a second set of begin and end markers
   when pron stop is invoked
     then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
 ```
