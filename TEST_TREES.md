@@ -31,6 +31,9 @@ System: pron-stop
   where /proc is available
     when the pidfile names a reused pid whose cmdline is not pron
       then the pidfile is removed and pron stop exits 0 without signalling
+  where /proc is not available
+    when the pidfile names a live pid
+      then the pid is treated as a pron daemon and signalled
   when the pidfile names a live pron daemon
     then SIGTERM is delivered and the daemon removes the pidfile and exits cleanly
   if the pid is still alive after 5s
