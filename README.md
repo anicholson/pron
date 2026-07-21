@@ -17,12 +17,12 @@ Place a `.prontab` in the working directory, one job per line as `min hour dom m
 ```sh
 echo "* * * * * echo hi" > .prontab   # one job per line: min hour dom mon dow command
 pron                                  # run in foreground (output to stdout)
-pron -d                              # run in daemon mode (logs to .pron.log)
+pron -d                              # start a detached daemon (returns once ready; logs to .pron.log)
 pron stop                            # stop the running pron (SIGTERM) and remove .pron.pid
 ```
 
 `pron` runs in the foreground, printing the start event and command output to stdout.
-`pron -d` / `--daemon` selects daemon mode, logging the same content to `.pron.log` instead.
+`pron -d` / `--daemon` forks a daemon that detaches from the terminal and logs to `.pron.log`; the command itself exits 0 once the daemon is ready (or non-zero with the error if startup fails), and the daemon keeps running until `pron stop`.
 Both modes write `.pron.pid` so `pron stop` works either way.
 
 ## Develop
