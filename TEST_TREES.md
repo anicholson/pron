@@ -19,6 +19,9 @@ Journey: scheduled-dev-tasks
     when another minute boundary is crossed
       then the job runs a second time
       and .pron.log shows a second set of begin and end markers
+  when pron -d is started again while the daemon is running
+    then the second start is refused with an error naming the running daemon's pid
+    and the pidfile still names the first daemon's pid
   when pron stop is invoked
     then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
 ```
