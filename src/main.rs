@@ -29,7 +29,10 @@ fn main() {
 
     let content = match std::fs::read_to_string(cwd.join(".prontab")) {
         Ok(c) => c,
-        Err(_) => String::new(),
+        Err(e) => {
+            eprintln!("error: cannot read .prontab: {e}");
+            std::process::exit(1);
+        }
     };
 
     let daemon = args.iter().any(|a| a == "-d" || a == "--daemon");
