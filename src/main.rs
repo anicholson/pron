@@ -110,7 +110,8 @@ fn do_stop(cwd: &Path) {
     let pid: i32 = match pid_str.trim().parse() {
         Ok(p) => p,
         Err(_) => {
-            std::process::exit(0);
+            eprintln!("error: .pron.pid contains invalid pid: {pid_str}");
+            std::process::exit(1);
         }
     };
 
