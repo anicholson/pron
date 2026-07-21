@@ -46,6 +46,8 @@ System: pron-stop
 
 **Declared gap:** the `if the pid is still alive after 5s` path is untested — it requires a pron daemon stuck in a long job that ignores SIGTERM, a >5s scenario that's fragile to simulate. The implementation in `src/main.rs:do_stop` has the polling loop and warning; the contract documents the intent.
 
+**Declared gap:** the `where /proc is not available` path is untested — the suite runs on Linux, where the non-`/proc` branch (`src/main.rs:looks_like_pron`) is compiled out. The contract pins the intent: without cmdline verification, a live pid is assumed to be pron and is signalled.
+
 ### System: foreground-mode (functional: tests/system_foreground.rs)
 ```
 System: foreground-mode
