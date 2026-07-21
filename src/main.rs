@@ -13,6 +13,7 @@ use pron::application::ports::filesystem::Filesystem;
 use pron::application::ports::logger::Logger;
 use pron::application::scheduler::Scheduler;
 use pron::application::start::Start;
+use pron::domain::crontab;
 
 fn main() {
     let cwd: PathBuf = std::env::current_dir().unwrap_or_else(|e| {
@@ -35,46 +36,120 @@ fn main() {
         }
     };
 
-    let daemon = args.iter().any(|a| a == "-d" || a == "--daemon");
-    let mode = if daemon { "daemon" } else { "foreground" };
+    if args.iter().any(|a| a == "-d" || a == "--daemon") {
+        run_daemon(&cwd, &content);
+    }
 
     let fs = RealFilesystem::new(&cwd);
     let proc = RealProcessControl::new();
-
-    let entries = if daemon {
-        let logger = RealLogger::new(&cwd);
-        let start = Start::new(fs, logger, proc);
-        match start.execute(&content, mode) {
-            Ok(e) => e,
-            Err(e) => {
-                eprintln!("error: {e}");
-                std::process::exit(1);
-            }
-        }
-    } else {
-        let logger = StdoutLogger::new();
-        let start = Start::new(fs, logger, proc);
-        match start.execute(&content, mode) {
-            Ok(e) => e,
-            Err(e) => {
-                eprintln!("error: {e}");
-                std::process::exit(1);
-            }
+    let logger = StdoutLogger::new();
+    let entries = match Start::new(fs, logger, proc).execute(&content, "foreground") {
+        Ok(e) => e,
+        Err(e) => {
+            eprintln!("error: {e}");
+            std::process::exit(1);
         }
     };
+    run_scheduler(&cwd, entries, Box::new(StdoutLogger::new()));
+}
 
+fn run_daemon(cwd: &Path, content: &str) -> ! {
+    if let Err(e) = crontab::parse(content) {
+        eprintln!("error: {e}");
+        std::process::exit(1);
+    }
+
+    let mut fds = [0i32; 2];
+    if unsafe { libc::pipe(fds.as_mut_ptr()) } != 0 {
+        eprintln!(
+            "error: cannot create pipe: {}",
+            std::io::Error::last_os_error()
+        );
+        std::process::exit(1);
+    }
+
+    match unsafe { libc::fork() } {
+        -1 => {
+            eprintln!("error: cannot fork: {}", std::io::Error::last_os_error());
+            std::process::exit(1);
+        }
+        0 => {
+            unsafe { libc::close(fds[0]) };
+            daemon_child(cwd, content, fds[1]);
+        }
+        _ => {
+            unsafe { libc::close(fds[1]) };
+            let mut msg = Vec::new();
+            loop {
+                let mut buf = [0u8; 1024];
+                let n = unsafe {
+                    libc::read(fds[0], buf.as_mut_ptr() as *mut libc::c_void, buf.len())
+                };
+                if n <= 0 {
+                    break;
+                }
+                msg.extend_from_slice(&buf[..n as usize]);
+            }
+            unsafe { libc::close(fds[0]) };
+
+            let msg = String::from_utf8_lossy(&msg);
+            if msg.starts_with("ok") {
+                std::process::exit(0);
+            }
+            let detail = msg.strip_prefix("err: ").unwrap_or(&msg);
+            eprintln!("error: {}", detail.trim_end());
+            std::process::exit(1);
+        }
+    }
+}
+
+fn daemon_child(cwd: &Path, content: &str, ready_fd: i32) -> ! {
+    unsafe { libc::setsid() };
+
+    let devnull = unsafe { libc::open(c"/dev/null".as_ptr(), libc::O_RDWR) };
+    if devnull >= 0 {
+        unsafe {
+            libc::dup2(devnull, 0);
+            libc::dup2(devnull, 1);
+            libc::dup2(devnull, 2);
+            if devnull > 2 {
+                libc::close(devnull);
+            }
+        }
+    }
+
+    let fs = RealFilesystem::new(cwd);
+    let logger = RealLogger::new(cwd);
+    let proc = RealProcessControl::new();
+    match Start::new(fs, logger, proc).execute(content, "daemon") {
+        Ok(entries) => {
+            write_ready(ready_fd, "ok");
+            unsafe { libc::close(ready_fd) };
+            run_scheduler(cwd, entries, Box::new(RealLogger::new(cwd)));
+        }
+        Err(e) => {
+            write_ready(ready_fd, &format!("err: {e}"));
+            unsafe { libc::close(ready_fd) };
+            std::process::exit(1);
+        }
+    }
+}
+
+fn write_ready(fd: i32, msg: &str) {
+    let bytes = msg.as_bytes();
+    unsafe {
+        libc::write(fd, bytes.as_ptr() as *const libc::c_void, bytes.len());
+    }
+}
+
+fn run_scheduler(cwd: &Path, entries: Vec<crontab::Entry>, logger: Box<dyn Logger>) -> ! {
     let shutdown = Arc::new(std::sync::atomic::AtomicBool::new(false));
     signal_hook::flag::register(signal_hook::consts::SIGTERM, shutdown.clone()).unwrap();
     signal_hook::flag::register(signal_hook::consts::SIGINT, shutdown.clone()).unwrap();
 
     let clock = SystemClock::new();
     let runner = ShProcessRunner::new();
-    let scheduler_logger: Box<dyn Logger> = if daemon {
-        Box::new(RealLogger::new(&cwd))
-    } else {
-        Box::new(StdoutLogger::new())
-    };
-    let scheduler = Scheduler::new(clock, runner, scheduler_logger, entries);
+    let scheduler = Scheduler::new(clock, runner, logger, entries);
 
     loop {
         let now = SystemTime::now()
@@ -85,7 +160,7 @@ fn main() {
         let sleep_until = SystemTime::now() + Duration::from_secs(secs_remaining);
         while SystemTime::now() < sleep_until {
             if shutdown.load(Ordering::Relaxed) {
-                let fs = RealFilesystem::new(&cwd);
+                let fs = RealFilesystem::new(cwd);
                 let _ = fs.remove_pidfile();
                 std::process::exit(0);
             }
