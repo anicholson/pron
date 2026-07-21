@@ -94,6 +94,24 @@ System: missing-crontab
     and no .pron.pid is written
 ```
 
+### System: single-instance (functional: tests/system_single_instance.rs)
+```
+System: single-instance
+  when pron is started while another pron holds a live pidfile
+    then the start is refused with an error naming the running pid
+    and the pidfile is unchanged
+    and the first pron keeps running
+  when pron -d is started while a daemon holds a live pidfile
+    then the start is refused with an error naming the running pid
+    and no second daemon is started
+    and the first daemon keeps running
+  when pron is started while the pidfile names a stale pid
+    then the stale pidfile is replaced and pron starts
+  where /proc is available
+    when pron is started while the pidfile names a reused pid whose cmdline is not pron
+      then the pidfile is replaced and the reused process is left running
+```
+
 ### Domain: Crontab (src: src/domain/crontab.rs; unit: src/domain/crontab.rs; integration: none; functional: none)
 ```
 Domain: Crontab
