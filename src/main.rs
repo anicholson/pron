@@ -65,7 +65,6 @@ fn main() {
 
     let shutdown = Arc::new(std::sync::atomic::AtomicBool::new(false));
     signal_hook::flag::register(signal_hook::consts::SIGTERM, shutdown.clone()).unwrap();
-    signal_hook::flag::register(signal_hook::consts::SIGINT, shutdown.clone()).unwrap();
 
     let clock = SystemClock::new();
     let runner = ShProcessRunner::new();
