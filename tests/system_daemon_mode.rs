@@ -118,6 +118,55 @@ mod when_pron_d_is_started_with_a_valid_prontab {
     }
 }
 
+mod if_the_prontab_has_a_syntax_error {
+    use super::*;
+
+    #[test]
+    fn then_pron_d_exits_non_zero_and_reports_the_parse_error() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "not a valid cron line\n").unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let output = Command::new(pron)
+            .arg("-d")
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+
+        assert!(
+            !output.status.success(),
+            "pron -d should exit non-zero when the crontab has a syntax error"
+        );
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        assert!(
+            stderr.to_lowercase().contains("parse") || stderr.to_lowercase().contains("error"),
+            "pron -d should report the parse error on stderr, got: {stderr}"
+        );
+    }
+
+    #[test]
+    fn and_no_daemon_is_left_running() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "not a valid cron line\n").unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let output = Command::new(pron)
+            .arg("-d")
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+
+        assert!(
+            !output.status.success(),
+            "pron -d should exit non-zero when the crontab has a syntax error"
+        );
+        assert!(
+            !dir.path().join(".pron.pid").exists(),
+            "no daemon should be left running (no .pron.pid) after a failed start"
+        );
+    }
+}
+
 mod where_proc_is_available {
     use super::*;
 
