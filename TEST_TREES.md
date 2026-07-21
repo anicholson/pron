@@ -10,8 +10,8 @@ Journey: scheduled-dev-tasks
   when a .prontab with a syntax error is placed and pron -d is started
     then pron refuses to start and reports the parse error
   when the .prontab is fixed with a valid per-minute job and pron -d is started
-    then the daemon starts
-      then .pron.pid is written
+    then pron -d exits 0 once the daemon is ready
+      then .pron.pid is written naming the daemon's pid
       then .pron.log is appended to with a start event
       when a minute boundary is crossed
         then the job's command runs in the working directory
