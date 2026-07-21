@@ -117,3 +117,38 @@ mod when_pron_d_is_started_with_a_valid_prontab {
         );
     }
 }
+
+mod where_proc_is_available {
+    use super::*;
+
+    mod when_pron_d_is_started_with_a_valid_prontab {
+        use super::*;
+
+        #[test]
+        fn then_the_daemon_runs_in_its_own_session_detached_from_the_terminal() {
+            let dir = tempfile::tempdir().unwrap();
+            fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+            let _guard = DaemonGuard::new(dir.path());
+            let mut child = start_daemon(dir.path());
+
+            let status = wait_for_exit(&mut child, Duration::from_secs(5))
+                .expect("pron -d should exit once the daemon is ready");
+            assert!(status.success(), "pron -d should exit 0, got {status}");
+
+            let pid_str = fs::read_to_string(dir.path().join(".pron.pid")).unwrap();
+            let daemon_pid: i32 = pid_str.trim().parse().unwrap();
+
+            let stat = fs::read_to_string(format!("/proc/{daemon_pid}/stat"))
+                .expect("/proc/{pid}/stat should be readable for the running daemon");
+            let after_comm = stat.rsplit_once(") ").expect("stat should contain comm").1;
+            let fields: Vec<&str> = after_comm.split_whitespace().collect();
+            let session: i32 = fields[3].parse().expect("session field should parse");
+
+            assert_eq!(
+                session, daemon_pid,
+                "the daemon should be a session leader in its own session (sid {session} != pid {daemon_pid})"
+            );
+        }
+    }
+}
