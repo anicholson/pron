@@ -35,6 +35,10 @@ System: pron-stop
     then SIGTERM is delivered and the daemon removes the pidfile and exits cleanly
   if the pid is still alive after 5s
     then pron stop warns and exits 0
+  if the pidfile does not exist
+    then pron stop reports the error and exits non-zero
+  if the pidfile contains an invalid pid
+    then pron stop reports the error and exits non-zero
 ```
 
 **Declared gap:** the `if the pid is still alive after 5s` path is untested — it requires a pron daemon stuck in a long job that ignores SIGTERM, a >5s scenario that's fragile to simulate. The implementation in `src/main.rs:do_stop` has the polling loop and warning; the contract documents the intent.
