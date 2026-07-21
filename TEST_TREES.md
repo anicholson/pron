@@ -53,8 +53,35 @@ System: foreground-mode
     when a minute boundary is crossed
       then the job's command runs in the working directory
       then the command's output flows to stdout with no markers
+  when SIGINT is received
+    then .pron.pid is removed and pron exits cleanly
   when pron stop is invoked
     then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
+```
+
+### System: daemon-mode (functional: tests/system_daemon_mode.rs)
+```
+System: daemon-mode
+  when pron -d is started with a valid .prontab
+    then pron -d exits 0 once the daemon is ready
+    and .pron.pid names the daemon's pid
+    and .pron.log is appended to with a start event
+  where /proc is available
+    when pron -d is started with a valid .prontab
+      then the daemon runs in its own session, detached from the terminal
+  if the .prontab has a syntax error
+    then pron -d exits non-zero and reports the parse error
+    and no daemon is left running
+  when pron stop is invoked
+    then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
+```
+
+### System: missing-crontab (functional: tests/system_missing_crontab.rs)
+```
+System: missing-crontab
+  when pron is started without a readable .prontab
+    then pron reports the read error and exits non-zero
+    and no .pron.pid is written
 ```
 
 ### Domain: Crontab (src: src/domain/crontab.rs; unit: src/domain/crontab.rs; integration: none; functional: none)
