@@ -263,4 +263,9 @@ Port: ProcessControl
   current_pid
     when called
       then it returns the expected pid
+  is_live_pron
+    when called with a pid that is not a live pron process
+      then false is returned
+    when called with a configured live pron pid
+      then true is returned
 ```
