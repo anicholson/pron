@@ -10,6 +10,50 @@ fn seconds_until_next_minute() -> u64 {
     60 - (now.as_secs() % 60)
 }
 
+fn wait_for_exit(child: &mut std::process::Child, timeout: Duration) -> Option<std::process::ExitStatus> {
+    let deadline = std::time::Instant::now() + timeout;
+    loop {
+        if let Ok(Some(status)) = child.try_wait() {
+            return Some(status);
+        }
+        if std::time::Instant::now() >= deadline {
+            return None;
+        }
+        thread::sleep(Duration::from_millis(50));
+    }
+}
+
+struct DaemonGuard(std::path::PathBuf);
+
+impl DaemonGuard {
+    fn new(dir: &std::path::Path) -> Self {
+        Self(dir.to_path_buf())
+    }
+}
+
+impl Drop for DaemonGuard {
+    fn drop(&mut self) {
+        let pidfile = self.0.join(".pron.pid");
+        if let Ok(pid_str) = fs::read_to_string(&pidfile) {
+            if let Ok(pid) = pid_str.trim().parse::<i32>() {
+                unsafe { libc::kill(pid, libc::SIGKILL) };
+            }
+            let _ = fs::remove_file(&pidfile);
+        }
+    }
+}
+
+fn start_daemon(dir: &std::path::Path) -> std::process::Child {
+    let pron = env!("CARGO_BIN_EXE_pron");
+    Command::new(pron)
+        .arg("-d")
+        .current_dir(dir)
+        .stdout(std::process::Stdio::piped())
+        .stderr(std::process::Stdio::piped())
+        .spawn()
+        .unwrap()
+}
+
 mod when_a_prontab_with_a_syntax_error_is_placed_and_pron_d_is_started {
     use super::*;
 
