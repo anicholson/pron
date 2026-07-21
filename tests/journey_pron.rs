@@ -85,7 +85,31 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
     use super::*;
 
     #[test]
-    fn then_pron_d_exits_zero_once_the_daemon_is_ready() {
+    fn then_pron_pid_is_written_naming_the_daemons_pid() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let _guard = DaemonGuard::new(dir.path());
+        let mut child = start_daemon(dir.path());
+        let launcher_pid = child.id();
+
+        let status = wait_for_exit(&mut child, Duration::from_secs(5))
+            .expect("pron -d should exit once the daemon is ready");
+        assert!(status.success(), "pron -d should exit 0, got {status}");
+
+        let pid_str = fs::read_to_string(dir.path().join(".pron.pid")).unwrap();
+        let daemon_pid: u32 = pid_str.trim().parse().unwrap();
+
+        assert_ne!(
+            daemon_pid, launcher_pid,
+            ".pron.pid should name the daemon's pid, not the exited launcher's pid {launcher_pid}"
+        );
+        let alive = unsafe { libc::kill(daemon_pid as i32, 0) == 0 };
+        assert!(alive, "the daemon (pid {daemon_pid}) should be running");
+    }
+
+    #[test]
+    fn then_pron_log_is_appended_to_with_a_start_event() {
         let dir = tempfile::tempdir().unwrap();
         fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
 
@@ -94,14 +118,12 @@ mod when_the_prontab_is_fixed_with_a_valid_per_minute_job_and_pron_d_is_started 
 
         let status = wait_for_exit(&mut child, Duration::from_secs(5))
             .expect("pron -d should exit once the daemon is ready");
-        assert!(
-            status.success(),
-            "pron -d should exit 0 once the daemon is ready, got {status}"
-        );
+        assert!(status.success(), "pron -d should exit 0, got {status}");
 
+        let log = fs::read_to_string(dir.path().join(".pron.log")).unwrap();
         assert!(
-            dir.path().join(".pron.pid").exists(),
-            ".pron.pid should be written once the daemon is ready"
+            log.contains("start"),
+            ".pron.log should contain a start event, got: {log}"
         );
     }
 
