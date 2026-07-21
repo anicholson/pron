@@ -81,7 +81,9 @@ System: daemon-mode
     then the daemon receives SIGTERM and .pron.pid is removed and the daemon exits cleanly
 ```
 
-**Declared gap:** session detachment is observed via `/proc/{pid}/stat` (the daemon's session id equals its pid). Where /proc is unavailable the daemon still detaches — `setsid` does not depend on `/proc` — but the suite does not verify it. (functional: tests/system_missing_crontab.rs)
+**Declared gap:** session detachment is observed via `/proc/{pid}/stat` (the daemon's session id equals its pid). Where /proc is unavailable the daemon still detaches — `setsid` does not depend on `/proc` — but the suite does not verify it.
+
+### System: missing-crontab (functional: tests/system_missing_crontab.rs)
 ```
 System: missing-crontab
   when pron is started without a readable .prontab
