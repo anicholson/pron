@@ -104,6 +104,8 @@ fn run_daemon(cwd: &Path, content: &str) -> ! {
 }
 
 fn daemon_child(cwd: &Path, content: &str, ready_fd: i32) -> ! {
+    unsafe { libc::setsid() };
+
     let devnull = unsafe { libc::open(c"/dev/null".as_ptr(), libc::O_RDWR) };
     if devnull >= 0 {
         unsafe {
