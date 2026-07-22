@@ -14,7 +14,7 @@ impl<U: Filesystem, L: Logger, P: ProcessControl> Start<U, L, P> {
 
     pub fn execute(&self, crontab_text: &str, mode: &str) -> Result<Vec<crontab::Entry>, String> {
         let entries = crontab::parse(crontab_text).map_err(|e| e.to_string())?;
-        if let Some(holder) = self.fs.read_pidfile()? {
+        if let Some(holder) = self.fs.read_pidfile().unwrap_or(None) {
             if self.proc.is_live_pron(holder) {
                 return Err(format!("pron is already running (pid {holder})"));
             }
