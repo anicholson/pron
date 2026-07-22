@@ -1,0 +1,112 @@
+---
+name: sync
+description: "Identify gaps and cruft — where intent and implementation have drifted apart. Compares test trees against code in both directions, then hands gaps to tdd. TRIGGER when: the user asks about drift, gaps, staleness, or completeness — including loose phrasings like 'check for drift', 'audit the project', 'something feels off', 'is this in sync', 'review the trees vs the code', 'propose fixes for drift', or 'what's missing?'."
+---
+
+# Sync
+
+Finds where the contract has drifted from reality. Compares the trees in `## Test Trees` against implementation in both directions — surfacing gaps (intent without code), cruft (code without intent), staleness (trees that no longer reflect the system), and **failing tests** (trees claim behaviour the system does not actually deliver). Resolves drift with the user, then hands gaps to `tdd`.
+
+After sync, the project must behave exactly as the test trees describe, and the test trees must describe and verify all behaviour. **A failing test means we are not synced.** Fixing existing test failures is part of sync's responsibility — not a separate concern to defer or hand back to the user untouched.
+
+## When to Use
+
+- After a significant implementation milestone
+- When you suspect test trees have drifted from implementation
+- Before a release or PR to verify completeness
+- When onboarding to bring test trees up to date with existing code
+- When the user asks "what's missing?" or "are we complete?"
+
+## Process
+
+### 1. LOAD TEST TREES
+
+Read `## Test Trees` in the project's CLAUDE.md. Parse each tree — every `when/then` path is a specified behaviour.
+
+If `## Test Trees` doesn't exist or has no trees, stop and suggest running `setup` first.
+
+### 2. INVENTORY IMPLEMENTATION
+
+Read the codebase to understand what's actually implemented:
+
+- Source code — what capabilities exist? What domain objects, use-cases, ports, adapters?
+- Existing tests at each layer (`*.domain.test.*`, `*.use-case.test.*`, `*.adapter.test.*`, `*.system.test.*`, `*.journey.test.*`) — what's already covered?
+- **Describe/it hierarchy in each test file** — parse the test source (`describe(`, `it(`, `test(`, `context(`, or the language's equivalent). This is the framework-agnostic comparison point: the hierarchy must mirror its tree verbatim.
+- Test output — where the framework supports nested output, run tests and read the tree reporter output. Supplementary to describe/it parsing.
+- **Test results** — run the full suite. Record every failure. Failing tests are first-class drift: the tree says the system does X, the test says it doesn't.
+
+### 3. COMPARE: TREES → IMPLEMENTATION
+
+For each test tree, check four things:
+
+1. **Path parity per category** — for each labelled pair in the tree's parenthesised paths (`src`, `unit`, `integration`, `functional`, `journey`), verify the named file exists on the filesystem. A tree that names `src/foo.ts` when the file lives at `src/bar.ts` (or nowhere) is drift. Any category declared `none` is surfaced as an explicit gap for the user to resolve — intentional-but-open, awaiting coverage.
+2. **Describe/it parity** — every path in the tree appears as a describe/it in the test file, and every describe/it in the test file appears as a path in the tree. Verbatim match.
+3. **Test passes** — the tests exist and are green.
+4. **Branch parity** (Domain, Use-case, Port-contract) — every observable branch in the unit's code corresponds to a tree path, and every path corresponds to a branch. YAGNI plus the code-shaped-tree rule makes this tight.
+
+### 4. COMPARE: IMPLEMENTATION → TREES
+
+Check the reverse — does the implementation do things no test tree describes? At Domain, Use-case, and Port-contract, any branch without a corresponding tree path is drift. At Journey, System, and Adapter, any observable behaviour at the seam without a tree is drift.
+
+### 5. RESOLVE DRIFT
+
+**Never resolve drift unilaterally.** Every case below requires a concrete user decision before any edit — even when the resolution seems obvious (e.g. "the function is clearly YAGNI, just delete it"). Drift is where intent and implementation disagree; silently picking a side destroys the contract this skill exists to protect. Present the drift, present the options, ask, then act on the answer.
+
+**Implementation missing for a tree path** (test tree exists, no code):
+- Flag as a gap to implement. These are the priority.
+
+**Implementation exists without a tree** (code exists, no test tree):
+- Present the two options to the user, with a quick read of the evidence: (a) the implementation is accidental scope creep → remove it, or (b) it's a legitimate capability → write a tree for it. Do not choose. Ask.
+
+**Coverage-by-proxy** (a unit is reachable only through higher-layer Journey or System tests, with no tree at its native ground layer):
+- Flag it. Journey and functional coverage is not coverage of the unit beneath. The fix is a new tree at the unit's native layer plus its own failing tests, then TDD them — never removal of the higher-layer test. Overlap between layers is intentional. Present to the user and queue the inner tree for `change` (or write it directly if the layer and behaviour are unambiguous), then hand the gaps to `tdd`.
+
+**Path drift** (a tree names a file path that does not exist on the filesystem):
+- Flag as drift. The path may be wrong (update the tree), the file may have been moved (update the tree), or the implementation is missing (hand to `tdd`). Present to the user and ask.
+
+**Declared gap** (a category value is `none`):
+- Surface it. This is not drift in the broken-state sense — it's an intentional marker that a category is expected but uncovered. List each `none` value per tree so the user can prioritise which gaps to close via `tdd`.
+
+**Failing tests** (test exists for a tree path but does not pass):
+- This is drift between trees and implementation — the tree promises behaviour the code does not deliver (or no longer delivers). Treat fixing it as part of sync, not someone else's problem. Diagnose: is the implementation wrong (fix the code, via `tdd` if the gap is large), or is the tree wrong (present to the user and ask before changing the contract)? Default assumption is the implementation is wrong unless evidence says otherwise. Sync is not complete while any test is red.
+
+**Missing System tree** (a slice has inner trees — Use-case, Domain, Adapter, Port — but no System tree above them):
+- This is outside-in drift: the inner pieces were specified without a user-visible contract pulling them into being. Present to the user. Either the slice needs a System tree written (the usual answer — outside-in failure recoverable by adding the outer contract), or the inner pieces are genuinely a pure library with no slice (rare — confirm and document the omission per the pure-library rule in `change`). Do not invent a System tree silently.
+
+**Stale trees** (test tree for capabilities that no longer exist):
+- Present to the user before removing. Ask whether the capability should come back (write/restore it) or the tree is truly obsolete (remove it).
+
+**Dead paths** (a `when/then` path that no longer reflects reality):
+- Present to the user. The path may need updating, or the implementation may be wrong — ask which.
+
+**Describe/it drift** (test file's describe/it hierarchy disagrees with its tree):
+- Present both the tree text and the describe/it hierarchy to the user. Ask which is authoritative — update the test to match the tree, or update the tree to match the test. Do not pick.
+
+After this step, test trees and implementation intent should be aligned, and the user has approved every change.
+
+### 6. IMPLEMENT GAPS
+
+For each tree with no test file (or no passing tests), suggest the user runs `tdd` to implement it. Present the gaps so they can prioritise.
+
+### 7. VERIFY
+
+After all gaps are implemented and all failing tests are resolved:
+
+- Run all tests at every layer — **every test must pass**. A red suite means sync is not done; return to step 5.
+- Confirm tree output matches `## Test Trees`
+- Re-read `## Test Trees` — confirm it accurately describes the system
+- If mutation testing is configured, run Stryker against Domain + Use-case as final validation
+
+## What Done Looks Like
+
+After sync completes:
+
+1. Every tree in `## Test Trees` has a test file; every `when/then` path has a passing test at that tree's layer
+2. The full test suite is green — zero failures, zero skips that hide drift
+3. Every test file reifies exactly one tree
+4. No undocumented capabilities — everything the system does is specified
+5. No stale trees — every tree describes something that exists
+6. Test output reads like `## Test Trees` — same language, same structure
+7. You can truthfully say: the project behaves as the trees describe, and the trees describe and verify all behaviour
+
+Once the project is in sync, suggest the user runs `second-opinion` for an independent review of the completed work from a different model.
