@@ -106,4 +106,74 @@ mod when_pron_is_started_while_another_pron_holds_a_live_pidfile {
             "the refusal should name the running pid {first_pid}, got: {stderr}"
         );
     }
+
+    #[test]
+    fn and_the_pidfile_is_unchanged() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let mut first = Command::new(pron)
+            .current_dir(dir.path())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+
+        thread::sleep(Duration::from_millis(500));
+        let first_pid = first.id();
+
+        let mut guard = DaemonGuard::new(dir.path());
+        guard.also_kill(first_pid as i32);
+
+        let second = Command::new(pron)
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+        assert!(
+            !second.status.success(),
+            "the second pron should be refused while the first is running"
+        );
+
+        let pidfile = fs::read_to_string(dir.path().join(".pron.pid")).unwrap();
+        assert_eq!(
+            pidfile.trim().parse::<u32>().unwrap(),
+            first_pid,
+            "the pidfile should still name the first pron's pid {first_pid}, got: {pidfile}"
+        );
+    }
+
+    #[test]
+    fn and_the_first_pron_keeps_running() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let mut first = Command::new(pron)
+            .current_dir(dir.path())
+            .stdout(std::process::Stdio::piped())
+            .stderr(std::process::Stdio::piped())
+            .spawn()
+            .unwrap();
+
+        thread::sleep(Duration::from_millis(500));
+        let first_pid = first.id();
+
+        let mut guard = DaemonGuard::new(dir.path());
+        guard.also_kill(first_pid as i32);
+
+        let second = Command::new(pron)
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+        assert!(
+            !second.status.success(),
+            "the second pron should be refused while the first is running"
+        );
+
+        assert!(
+            first.try_wait().unwrap().is_none(),
+            "the first pron should still be running after the refused start"
+        );
+    }
 }
