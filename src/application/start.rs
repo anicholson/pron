@@ -92,6 +92,51 @@ mod tests {
                     "error should name the holding pid, got: {err}"
                 );
             }
+
+            #[test]
+            fn and_the_pidfile_is_unchanged() {
+                use crate::application::ports::filesystem::Filesystem;
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
+                let fs = InMemoryFilesystem::default();
+                fs.write_pidfile(4242).unwrap();
+                let logger = InMemoryLogger::default();
+                let proc = InMemoryProcessControl::with_live_pron(4242);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
+
+                let _ = start.execute("* * * * * echo hi\n", "daemon");
+
+                assert_eq!(
+                    *fs.pid.lock().unwrap(),
+                    Some(4242),
+                    "the pidfile should be unchanged after a refused start"
+                );
+            }
+
+            #[test]
+            fn and_no_start_event_is_logged() {
+                use crate::application::ports::filesystem::Filesystem;
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
+                let fs = InMemoryFilesystem::default();
+                fs.write_pidfile(4242).unwrap();
+                let logger = InMemoryLogger::default();
+                let proc = InMemoryProcessControl::with_live_pron(4242);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
+
+                let _ = start.execute("* * * * * echo hi\n", "daemon");
+
+                assert!(
+                    logger.events.lock().unwrap().is_empty(),
+                    "no start event should be logged after a refused start"
+                );
+            }
         }
 
         mod if_called_with_an_invalid_crontab {
