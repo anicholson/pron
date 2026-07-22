@@ -1,4 +1,5 @@
 pub trait Filesystem: Send + Sync {
+    fn read_pidfile(&self) -> Result<Option<u32>, String>;
     fn write_pidfile(&self, pid: u32) -> Result<(), String>;
     fn remove_pidfile(&self) -> Result<(), String>;
 }
@@ -11,9 +12,26 @@ pub mod in_memory {
     #[derive(Default, Clone)]
     pub struct InMemoryFilesystem {
         pub pid: Arc<Mutex<Option<u32>>>,
+        read_error: Option<String>,
+    }
+
+    impl InMemoryFilesystem {
+        pub fn with_read_error(error: &str) -> Self {
+            Self {
+                pid: Arc::new(Mutex::new(None)),
+                read_error: Some(error.to_string()),
+            }
+        }
     }
 
     impl Filesystem for InMemoryFilesystem {
+        fn read_pidfile(&self) -> Result<Option<u32>, String> {
+            if let Some(e) = &self.read_error {
+                return Err(e.clone());
+            }
+            Ok(*self.pid.lock().unwrap())
+        }
+
         fn write_pidfile(&self, pid: u32) -> Result<(), String> {
             *self.pid.lock().unwrap() = Some(pid);
             Ok(())
