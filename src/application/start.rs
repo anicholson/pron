@@ -64,6 +64,31 @@ mod tests {
             }
         }
 
+        mod when_called_while_a_live_pron_process_holds_the_pidfile {
+            #[test]
+            fn then_an_error_naming_the_holding_pid_is_returned() {
+                use crate::application::ports::filesystem::Filesystem;
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
+                let fs = InMemoryFilesystem::default();
+                fs.write_pidfile(4242).unwrap();
+                let logger = InMemoryLogger::default();
+                let proc = InMemoryProcessControl::with_live_pron(4242);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
+
+                let result = start.execute("* * * * * echo hi\n", "daemon");
+                let err = result
+                    .expect_err("start should be refused while a live pron holds the pidfile");
+                assert!(
+                    err.contains("4242"),
+                    "error should name the holding pid, got: {err}"
+                );
+            }
+        }
+
         mod if_called_with_an_invalid_crontab {
             #[test]
             fn then_a_parse_error_is_returned_without_writing_the_pidfile() {
