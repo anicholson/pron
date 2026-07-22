@@ -305,6 +305,40 @@ mod when_pron_d_is_started_again_while_the_daemon_is_running {
             "the refusal should name the running daemon's pid {daemon_pid}, got: {stderr}"
         );
     }
+
+    #[test]
+    fn and_the_pidfile_still_names_the_first_daemons_pid() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(dir.path().join(".prontab"), "* * * * * echo hi\n").unwrap();
+
+        let mut guard = DaemonGuard::new(dir.path());
+        let mut child = start_daemon(dir.path());
+        let status = wait_for_exit(&mut child, Duration::from_secs(5))
+            .expect("pron -d should exit once the daemon is ready");
+        assert!(status.success(), "pron -d should exit 0, got {status}");
+
+        let pid_str = fs::read_to_string(dir.path().join(".pron.pid")).unwrap();
+        let daemon_pid: i32 = pid_str.trim().parse().unwrap();
+        guard.also_kill(daemon_pid);
+
+        let pron = env!("CARGO_BIN_EXE_pron");
+        let second = Command::new(pron)
+            .arg("-d")
+            .current_dir(dir.path())
+            .output()
+            .unwrap();
+        assert!(
+            !second.status.success(),
+            "the second pron -d should be refused while the daemon is running"
+        );
+
+        let pidfile = fs::read_to_string(dir.path().join(".pron.pid")).unwrap();
+        assert_eq!(
+            pidfile.trim().parse::<i32>().unwrap(),
+            daemon_pid,
+            "the pidfile should still name the first daemon's pid {daemon_pid}, got: {pidfile}"
+        );
+    }
 }
 
 mod when_pron_stop_is_invoked {
