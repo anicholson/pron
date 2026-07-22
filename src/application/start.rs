@@ -139,6 +139,52 @@ mod tests {
             }
         }
 
+        mod when_called_while_the_pidfile_names_a_stale_pid {
+            #[test]
+            fn then_the_pidfile_is_replaced_with_the_current_pid() {
+                use crate::application::ports::filesystem::Filesystem;
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
+                let fs = InMemoryFilesystem::default();
+                fs.write_pidfile(4242).unwrap();
+                let logger = InMemoryLogger::default();
+                let proc = InMemoryProcessControl::with_pid(5555);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
+
+                start.execute("* * * * * echo hi\n", "daemon").unwrap();
+
+                assert_eq!(
+                    *fs.pid.lock().unwrap(),
+                    Some(5555),
+                    "the stale pidfile should be replaced with the current pid"
+                );
+            }
+
+            #[test]
+            fn then_a_start_event_is_logged() {
+                use crate::application::ports::filesystem::Filesystem;
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
+                let fs = InMemoryFilesystem::default();
+                fs.write_pidfile(4242).unwrap();
+                let logger = InMemoryLogger::default();
+                let proc = InMemoryProcessControl::with_pid(5555);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
+
+                start.execute("* * * * * echo hi\n", "daemon").unwrap();
+
+                let events = logger.events.lock().unwrap();
+                assert_eq!(events.len(), 1);
+                assert!(events[0].contains("start"), "event: {}", events[0]);
+            }
+        }
+
         mod if_called_with_an_invalid_crontab {
             #[test]
             fn then_a_parse_error_is_returned_without_writing_the_pidfile() {
