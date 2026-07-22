@@ -185,6 +185,37 @@ mod tests {
             }
         }
 
+        mod if_the_pidfile_cannot_be_parsed {
+            #[test]
+            fn then_an_error_is_returned_and_the_pidfile_is_unchanged() {
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
+                let fs = InMemoryFilesystem::with_read_error("corrupt pidfile");
+                let logger = InMemoryLogger::default();
+                let proc = InMemoryProcessControl::with_pid(5555);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
+
+                let result = start.execute("* * * * * echo hi\n", "daemon");
+
+                assert!(
+                    result.is_err(),
+                    "start should fail when the pidfile cannot be parsed"
+                );
+                assert_eq!(
+                    *fs.pid.lock().unwrap(),
+                    None,
+                    "the pidfile should be unchanged (no write) after the read error"
+                );
+                assert!(
+                    logger.events.lock().unwrap().is_empty(),
+                    "no start event should be logged after the read error"
+                );
+            }
+        }
+
         mod if_called_with_an_invalid_crontab {
             #[test]
             fn then_a_parse_error_is_returned_without_writing_the_pidfile() {
