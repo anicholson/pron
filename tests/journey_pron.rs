@@ -23,22 +23,35 @@ fn wait_for_exit(child: &mut std::process::Child, timeout: Duration) -> Option<s
     }
 }
 
-struct DaemonGuard(std::path::PathBuf);
+struct DaemonGuard {
+    dir: std::path::PathBuf,
+    extra_pids: Vec<i32>,
+}
 
 impl DaemonGuard {
     fn new(dir: &std::path::Path) -> Self {
-        Self(dir.to_path_buf())
+        Self {
+            dir: dir.to_path_buf(),
+            extra_pids: Vec::new(),
+        }
+    }
+
+    fn also_kill(&mut self, pid: i32) {
+        self.extra_pids.push(pid);
     }
 }
 
 impl Drop for DaemonGuard {
     fn drop(&mut self) {
-        let pidfile = self.0.join(".pron.pid");
+        let pidfile = self.dir.join(".pron.pid");
         if let Ok(pid_str) = fs::read_to_string(&pidfile) {
             if let Ok(pid) = pid_str.trim().parse::<i32>() {
                 unsafe { libc::kill(pid, libc::SIGKILL) };
             }
             let _ = fs::remove_file(&pidfile);
+        }
+        for pid in &self.extra_pids {
+            unsafe { libc::kill(*pid, libc::SIGKILL) };
         }
     }
 }
