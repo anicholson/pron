@@ -12,7 +12,7 @@
 
 - **Runner**: cargo-nextest (process-per-test isolation, parallel, better failure output than `cargo test`).
 - **Tree output**: `make test` pipes nextest's libtest-JSON through `xtask`, which re-nests `::`-separated module paths into indented tree output with pass/fail icons.
-- **Mutation**: cargo-mutants with nextest, scoped to `--lib` (Domain + Use-case only).
+- **Mutation**: cargo-mutants with nextest, mutating the whole `pron` crate (including `main.rs`). Each mutant is checked against `--lib` plus the fast Port-layer contract tests (`tests/port_*.rs`) — not the slow System/Journey tests, which wait on real wall-clock minute boundaries and would make per-mutant checking impractically slow.
 - **CI**: `make test-ci` runs nextest with the `ci` profile (retries + JUnit XML at `target/nextest/ci/junit.xml`).
 
 ### Layer commands
