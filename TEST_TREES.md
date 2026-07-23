@@ -213,13 +213,14 @@ Use-case: scheduler
       then the exit code is logged
 ```
 
-### Port: Clock (src: src/application/ports/clock.rs; unit: tests/port_clock.rs; integration: none; functional: none)
+### Port: Clock (src: src/application/ports/clock.rs; unit: tests/port_clock.rs, src/adapters/clock.rs; integration: none; functional: none)
 ```
 Port: Clock
   now
     when called
       then the current minute tuple is returned
       and each field is within its valid range
+      and the date and time fields are computed correctly, verified against known reference dates
 ```
 
 ### Port: ProcessRunner (src: src/application/ports/process_runner.rs; unit: tests/port_process_runner.rs; integration: none; functional: none)
