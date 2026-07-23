@@ -31,7 +31,7 @@ Both modes write `.pron.pid` so `pron stop` works either way.
 cargo build        # build the binary
 make test          # run all tests (tree-formatted)
 make test-lib      # run unit tests only (Domain + Use-case)
-make test-mutate   # mutation testing (Domain + Use-case)
+make test-mutate   # mutation testing (whole crate, checked against fast tests)
 ```
 
 See `AGENTS.md` for the full per-layer test command reference.
