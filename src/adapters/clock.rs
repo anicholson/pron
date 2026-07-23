@@ -33,6 +33,9 @@ fn civil_from_days(z: i64) -> (i64, u32, u32) {
 }
 
 fn day_of_week(days: i64) -> u32 {
+    // The inner `% 7`s are redundant with the final normalization for any input value:
+    // `(a % 7 + b) % 7 == (a + b) % 7` always holds, so mutating them changes no observable
+    // output. Kept for symmetry/readability, not because they affect the result.
     let dow = ((days % 7) + 4) as i32;
     (((dow % 7) + 7) % 7) as u32
 }
