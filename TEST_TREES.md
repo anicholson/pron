@@ -233,7 +233,7 @@ Port: ProcessRunner
       and stderr is captured separately from stdout
 ```
 
-### Port: Filesystem (src: src/application/ports/filesystem.rs; unit: tests/port_filesystem.rs; integration: none; functional: none)
+### Port: Filesystem (src: src/application/ports/filesystem.rs; unit: tests/port_filesystem.rs, src/adapters/fs.rs; integration: none; functional: none)
 ```
 Port: Filesystem
   read_pidfile
@@ -243,6 +243,8 @@ Port: Filesystem
       then the written pid is returned
     if the pidfile content is invalid
       then an error is returned
+    if the pidfile path is not a readable regular file (e.g. a directory)
+      then the error is surfaced rather than treated as a missing pidfile
   write_pidfile
     when called with a pid
       then the pid is retrievable
