@@ -66,6 +66,19 @@ process_control_contract!(
     not_pron_alive: crate::with_non_pron_process(|pid| pid)
 );
 
+/// Spawns a real, non-pron process (a `sleep`), hands its pid to `f`, then kills it.
+fn with_non_pron_process<T>(f: impl FnOnce(u32) -> T) -> T {
+    let mut child = std::process::Command::new("sleep").arg("30").spawn().unwrap();
+    let pid = child.id();
+
+    let result = f(pid);
+
+    let _ = child.kill();
+    let _ = child.wait();
+
+    result
+}
+
 /// Spawns a real, detached `pron -d` daemon, runs `f` while it's confirmed alive
 /// (the check must happen inside `f` — the daemon is killed once `f` returns), then kills it.
 fn with_live_pron_daemon<T>(f: impl FnOnce(u32) -> T) -> T {
