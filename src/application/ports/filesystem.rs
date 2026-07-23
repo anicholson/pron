@@ -13,6 +13,7 @@ pub mod in_memory {
     pub struct InMemoryFilesystem {
         pub pid: Arc<Mutex<Option<u32>>>,
         read_error: Option<String>,
+        write_error: Option<String>,
     }
 
     impl InMemoryFilesystem {
@@ -20,6 +21,15 @@ pub mod in_memory {
             Self {
                 pid: Arc::new(Mutex::new(None)),
                 read_error: Some(error.to_string()),
+                write_error: None,
+            }
+        }
+
+        pub fn with_write_error(error: &str) -> Self {
+            Self {
+                pid: Arc::new(Mutex::new(None)),
+                read_error: None,
+                write_error: Some(error.to_string()),
             }
         }
     }
@@ -33,6 +43,9 @@ pub mod in_memory {
         }
 
         fn write_pidfile(&self, pid: u32) -> Result<(), String> {
+            if let Some(e) = &self.write_error {
+                return Err(e.clone());
+            }
             *self.pid.lock().unwrap() = Some(pid);
             Ok(())
         }

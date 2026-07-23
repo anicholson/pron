@@ -6,6 +6,13 @@ macro_rules! clock_contract {
                 mod when_called {
                     #[test]
                     fn then_the_current_minute_tuple_is_returned() {
+                        use pron::application::ports::clock::{Clock, Minute};
+                        let clock = $make;
+                        let _m: Minute = clock.now();
+                    }
+
+                    #[test]
+                    fn and_each_field_is_within_its_valid_range() {
                         use pron::application::ports::clock::Clock;
                         let clock = $make;
                         let m = clock.now();

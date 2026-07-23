@@ -22,7 +22,7 @@ impl<C: Clock, R: ProcessRunner, L: Logger> Scheduler<C, R, L> {
             if cron_expr::matches(&entry.expr, m.min, m.hour, m.dom, m.mon, m.dow) {
                 match self.runner.run(&entry.command) {
                     Ok(result) if result.exit_status == 0 => {
-                        self.logger.log_job(&entry.command, &result.stdout);
+                        self.logger.log_job(&entry.command, &result.stdout, &result.stderr);
                     }
                     Ok(result) => {
                         self.logger.log_job_exit(&entry.command, result.exit_status);
@@ -140,7 +140,7 @@ mod tests {
             }
         }
 
-        mod when_the_command_fails_to_spawn {
+        mod if_the_command_fails_to_spawn {
             #[test]
             fn then_the_failure_is_logged() {
                 use crate::application::ports::clock::in_memory::InMemoryClock;
@@ -170,7 +170,7 @@ mod tests {
             }
         }
 
-        mod when_the_command_exits_with_a_non_zero_code {
+        mod if_the_command_exits_with_a_non_zero_code {
             #[test]
             fn then_the_exit_code_is_logged() {
                 use crate::application::ports::clock::in_memory::InMemoryClock;

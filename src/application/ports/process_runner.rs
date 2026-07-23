@@ -1,6 +1,7 @@
 pub struct RunResult {
     pub exit_status: i32,
     pub stdout: String,
+    pub stderr: String,
 }
 
 pub trait ProcessRunner: Send + Sync {
@@ -17,6 +18,8 @@ pub mod in_memory {
         pub commands: Arc<Mutex<Vec<String>>>,
         pub spawn_error: Arc<Mutex<Option<String>>>,
         pub exit_status: Arc<Mutex<i32>>,
+        pub stdout: Arc<Mutex<String>>,
+        pub stderr: Arc<Mutex<String>>,
     }
 
     impl InMemoryProcessRunner {
@@ -33,6 +36,14 @@ pub mod in_memory {
                 ..Default::default()
             }
         }
+
+        pub fn with_output(stdout: &str, stderr: &str) -> Self {
+            Self {
+                stdout: Arc::new(Mutex::new(stdout.to_string())),
+                stderr: Arc::new(Mutex::new(stderr.to_string())),
+                ..Default::default()
+            }
+        }
     }
 
     impl ProcessRunner for InMemoryProcessRunner {
@@ -42,7 +53,9 @@ pub mod in_memory {
                 return Err(e);
             }
             let exit_status = *self.exit_status.lock().unwrap();
-            Ok(RunResult { exit_status, stdout: String::new() })
+            let stdout = self.stdout.lock().unwrap().clone();
+            let stderr = self.stderr.lock().unwrap().clone();
+            Ok(RunResult { exit_status, stdout, stderr })
         }
     }
 }

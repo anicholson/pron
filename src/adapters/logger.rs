@@ -29,10 +29,14 @@ impl Logger for RealLogger {
         ));
     }
 
-    fn log_job(&self, command: &str, output: &str) {
+    fn log_job(&self, command: &str, stdout: &str, stderr: &str) {
         self.append(&format!("--- begin: {} ---", command));
-        if !output.is_empty() {
-            self.append(output.trim_end());
+        if !stdout.is_empty() {
+            self.append(stdout.trim_end());
+        }
+        if !stderr.is_empty() {
+            self.append("--- stderr ---");
+            self.append(stderr.trim_end());
         }
         self.append(&format!("--- end: {} ---", command));
     }

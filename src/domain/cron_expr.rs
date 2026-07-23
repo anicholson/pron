@@ -1,4 +1,4 @@
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct CronExpr {
     minute: u64,
     hour: u64,
@@ -233,6 +233,23 @@ mod tests {
                 assert!(
                     error.contains("70-80"),
                     "error should name the out-of-range range: {error}"
+                );
+            }
+        }
+
+        mod if_a_range_has_its_endpoints_reversed {
+            #[test]
+            fn then_a_parse_error_is_returned_naming_the_field_and_value() {
+                let result = crate::domain::cron_expr::parse("10-5", "*", "*", "*", "*");
+                assert!(result.is_err());
+                let error = result.unwrap_err().to_string();
+                assert!(
+                    error.contains("minute"),
+                    "error should name the field: {error}"
+                );
+                assert!(
+                    error.contains("10-5"),
+                    "error should name the reversed range: {error}"
                 );
             }
         }

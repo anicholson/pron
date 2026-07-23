@@ -23,7 +23,8 @@ impl ProcessRunner for ShProcessRunner {
             .output()
             .map_err(|e| format!("spawn: {e}"))?;
         let stdout = String::from_utf8_lossy(&output.stdout).to_string();
+        let stderr = String::from_utf8_lossy(&output.stderr).to_string();
         let exit_status = output.status.code().unwrap_or(0);
-        Ok(RunResult { exit_status, stdout })
+        Ok(RunResult { exit_status, stdout, stderr })
     }
 }

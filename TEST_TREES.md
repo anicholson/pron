@@ -39,6 +39,8 @@ System: pron-stop
       then the pid is treated as a pron daemon and signalled
   when the pidfile names a live pron daemon
     then SIGTERM is delivered and the daemon removes the pidfile and exits cleanly
+  if SIGTERM cannot be delivered to a confirmed-live pron process (e.g. permission denied)
+    then pron stop reports the error and exits non-zero without removing the pidfile
   if the pid is still alive after 5s
     then pron stop warns and exits 0
   if the pidfile does not exist
@@ -51,6 +53,8 @@ System: pron-stop
 
 **Declared gap:** the `where /proc is not available` path is untested — the suite runs on Linux, where the non-`/proc` branch (`src/main.rs:looks_like_pron`) is compiled out. The contract pins the intent: without cmdline verification, a live pid is assumed to be pron and is signalled.
 
+**Declared gap:** the `if SIGTERM cannot be delivered` path is untested — `kill(2)` permission checks use the same uid/gid rules as the earlier liveness probe (`kill(pid, 0)`), so provoking a permission failure after that probe already passed would require the target process to change privileges during a narrow race window, or running the suite as a second, unprivileged user against another user's process. `src/main.rs:do_stop` implements the ESRCH-vs-other-error distinction via `std::io::Error::last_os_error()`; the non-ESRCH branch is exercised only by code review.
+
 ### System: foreground-mode (functional: tests/system_foreground.rs)
 ```
 System: foreground-mode
@@ -61,6 +65,7 @@ System: foreground-mode
     when a minute boundary is crossed
       then the job's command runs in the working directory
       then the command's output flows to stdout with no markers
+      and the command's stderr flows to pron's stderr, separate from stdout
   when SIGINT is received
     then .pron.pid is removed and pron exits cleanly
   when pron stop is invoked
@@ -141,6 +146,8 @@ Domain: CronExpr
     if a field value is out of range
       then a parse error is returned naming the field and value
       and a parse error is returned for a range with an out-of-range endpoint
+    if a range has its endpoints reversed (low greater than high)
+      then a parse error is returned naming the field and value
     when a field is a step expression
       then only every Nth value in the valid range is set
     when a field is a range expression
@@ -183,6 +190,8 @@ Use-case: start
       then a start event is logged
     if the pidfile cannot be parsed
       then an error is returned and the pidfile is unchanged
+    if the pidfile cannot be written
+      then an error is returned and no start event is logged
     if called with an invalid crontab
       then a parse error is returned without writing the pidfile
 ```
@@ -220,6 +229,7 @@ Port: ProcessRunner
     when called with a command
       then the command is executed and stdout returned
       and the exit status is returned as zero on success
+      and stderr is captured separately from stdout
 ```
 
 ### Port: Filesystem (src: src/application/ports/filesystem.rs; unit: tests/port_filesystem.rs; integration: none; functional: none)
@@ -247,8 +257,9 @@ Port: Logger
     when called with a mode, a crontab path, and an entry count
       then a start event containing the mode and entry count is recorded
   log_job
-    when called with a command and output
-      then begin and end markers with the command and output are recorded
+    when called with a command, stdout, and stderr
+      then begin and end markers with the command and stdout are recorded
+      and stderr is included between the markers when the command produced any
   log_job_exit
     when called with a command and a non-zero exit status
       then an exit-code line naming the command and code is recorded

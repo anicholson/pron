@@ -31,7 +31,7 @@ macro_rules! logger_contract {
                     fn then_begin_and_end_markers_with_command_and_output_are_recorded() {
                         use pron::application::ports::logger::Logger;
                         let (logger, read) = $setup;
-                        logger.log_job("echo hi", "hi");
+                        logger.log_job("echo hi", "hi", "");
                         let recorded = read();
                         assert!(
                             recorded.contains("--- begin: echo hi"),
@@ -44,6 +44,22 @@ macro_rules! logger_contract {
                         assert!(
                             recorded.contains("--- end: echo hi"),
                             "expected end marker in recorded output: {recorded}"
+                        );
+                    }
+
+                    #[test]
+                    fn and_stderr_is_included_between_the_markers_when_the_command_produced_any() {
+                        use pron::application::ports::logger::Logger;
+                        let (logger, read) = $setup;
+                        logger.log_job("echo hi 1>&2", "", "oops");
+                        let recorded = read();
+                        assert!(
+                            recorded.contains("oops"),
+                            "expected stderr content in recorded output: {recorded}"
+                        );
+                        assert!(
+                            recorded.contains("--- begin:") && recorded.contains("--- end:"),
+                            "stderr should still be recorded between the begin/end markers: {recorded}"
                         );
                     }
                 }

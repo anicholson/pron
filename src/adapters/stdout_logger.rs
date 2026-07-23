@@ -25,12 +25,19 @@ impl Logger for StdoutLogger {
         );
     }
 
-    fn log_job(&self, _command: &str, output: &str) {
-        let mut out = std::io::stdout().lock();
-        if !output.is_empty() {
-            let _ = write!(out, "{}", output);
-            if !output.ends_with('\n') {
+    fn log_job(&self, _command: &str, stdout: &str, stderr: &str) {
+        if !stdout.is_empty() {
+            let mut out = std::io::stdout().lock();
+            let _ = write!(out, "{}", stdout);
+            if !stdout.ends_with('\n') {
                 let _ = writeln!(out);
+            }
+        }
+        if !stderr.is_empty() {
+            let mut err = std::io::stderr().lock();
+            let _ = write!(err, "{}", stderr);
+            if !stderr.ends_with('\n') {
+                let _ = writeln!(err);
             }
         }
     }

@@ -204,9 +204,14 @@ fn do_stop(cwd: &Path) {
 
     unsafe {
         if libc::kill(pid, libc::SIGTERM) != 0 {
-            eprintln!("warning: stale pidfile (pid {pid} not alive), removing");
-            let _ = std::fs::remove_file(cwd.join(".pron.pid"));
-            std::process::exit(0);
+            let err = std::io::Error::last_os_error();
+            if err.raw_os_error() == Some(libc::ESRCH) {
+                eprintln!("warning: stale pidfile (pid {pid} not alive), removing");
+                let _ = std::fs::remove_file(cwd.join(".pron.pid"));
+                std::process::exit(0);
+            }
+            eprintln!("error: cannot signal pid {pid}: {err}");
+            std::process::exit(1);
         }
     }
 

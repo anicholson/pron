@@ -14,10 +14,10 @@ impl<U: Filesystem, L: Logger, P: ProcessControl> Start<U, L, P> {
 
     pub fn execute(&self, crontab_text: &str, mode: &str) -> Result<Vec<crontab::Entry>, String> {
         let entries = crontab::parse(crontab_text).map_err(|e| e.to_string())?;
-        if let Some(holder) = self.fs.read_pidfile()? {
-            if self.proc.is_live_pron(holder) {
-                return Err(format!("pron is already running (pid {holder})"));
-            }
+        if let Some(holder) = self.fs.read_pidfile()?
+            && self.proc.is_live_pron(holder)
+        {
+            return Err(format!("pron is already running (pid {holder})"));
         }
         let pid = self.proc.current_pid();
         self.fs.write_pidfile(pid)?;
@@ -212,6 +212,32 @@ mod tests {
                 assert!(
                     logger.events.lock().unwrap().is_empty(),
                     "no start event should be logged after the read error"
+                );
+            }
+        }
+
+        mod if_the_pidfile_cannot_be_written {
+            #[test]
+            fn then_an_error_is_returned_and_no_start_event_is_logged() {
+                use crate::application::ports::filesystem::in_memory::InMemoryFilesystem;
+                use crate::application::ports::logger::in_memory::InMemoryLogger;
+                use crate::application::ports::process_control::in_memory::InMemoryProcessControl;
+                use crate::application::start::Start;
+
+                let fs = InMemoryFilesystem::with_write_error("disk full");
+                let logger = InMemoryLogger::default();
+                let proc = InMemoryProcessControl::with_pid(4242);
+                let start = Start::new(fs.clone(), logger.clone(), proc);
+
+                let result = start.execute("* * * * * echo hi\n", "daemon");
+
+                assert!(
+                    result.is_err(),
+                    "start should fail when the pidfile cannot be written"
+                );
+                assert!(
+                    logger.events.lock().unwrap().is_empty(),
+                    "no start event should be logged after a write failure"
                 );
             }
         }

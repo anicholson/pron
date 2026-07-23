@@ -157,6 +157,50 @@ mod when_pron_is_started_without_d {
                 "stdout should NOT contain end markers in foreground mode, got: {stdout}"
             );
         }
+
+        #[test]
+        fn and_the_commands_stderr_flows_to_prons_stderr_separate_from_stdout() {
+            let dir = tempfile::tempdir().unwrap();
+            fs::write(dir.path().join(".prontab"), "* * * * * echo out; echo err 1>&2\n").unwrap();
+
+            let pron = env!("CARGO_BIN_EXE_pron");
+            let mut child = Command::new(pron)
+                .current_dir(dir.path())
+                .stdout(std::process::Stdio::piped())
+                .stderr(std::process::Stdio::piped())
+                .spawn()
+                .unwrap();
+
+            let wait = super::super::seconds_until_next_minute() + 3;
+            thread::sleep(Duration::from_secs(wait));
+
+            child.kill().unwrap();
+            let _ = child.wait();
+
+            let mut stdout = String::new();
+            if let Some(mut out) = child.stdout.take() {
+                use std::io::Read;
+                let _ = out.read_to_string(&mut stdout);
+            }
+            let mut stderr = String::new();
+            if let Some(mut err) = child.stderr.take() {
+                use std::io::Read;
+                let _ = err.read_to_string(&mut stderr);
+            }
+
+            assert!(
+                stdout.contains("out"),
+                "stdout should contain the command's stdout 'out', got: {stdout}"
+            );
+            assert!(
+                !stdout.contains("err"),
+                "stdout should NOT contain the command's stderr, got: {stdout}"
+            );
+            assert!(
+                stderr.contains("err"),
+                "pron's stderr should contain the command's stderr 'err', got: {stderr}"
+            );
+        }
     }
 }
 
