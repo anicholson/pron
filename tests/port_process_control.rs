@@ -1,6 +1,6 @@
 #[macro_export]
 macro_rules! process_control_contract {
-    ($mod_name:ident, $make:expr, $expected:expr $(, live_pron: $live_pron_check:expr)? $(, not_pron_alive: $not_pron_alive_pid:expr)?) => {
+    ($mod_name:ident, $make:expr, $expected:expr $(, live_pron: $live_pron_check:expr)? $(, not_pron_alive: $not_pron_alive_check:expr)?) => {
         mod $mod_name {
             mod current_pid {
                 mod when_called {
