@@ -223,6 +223,8 @@ Port: Clock
       and the date and time fields are computed correctly, verified against known reference dates
 ```
 
+**Declared gap:** `src/adapters/clock.rs:civil_from_days`'s negative-`z` branch is untestable with any date `pron` can actually encounter — `SystemClock` only calls it with `days` derived from a live wall clock (never before 1970), and even the proleptic-Gregorian boundary (year 1 AD) still yields a positive `z`. Separately, `day_of_week`'s inner `% 7` operations are mutation-equivalent to no-ops for any input, since the function's own closing `(x % 7 + 7) % 7` normalization absorbs them (`(a % 7 + b) % 7 == (a + b) % 7` holds unconditionally) — not a coverage gap, but a true equivalent mutant.
+
 ### Port: ProcessRunner (src: src/application/ports/process_runner.rs; unit: tests/port_process_runner.rs; integration: none; functional: none)
 ```
 Port: ProcessRunner
