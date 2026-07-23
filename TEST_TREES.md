@@ -269,7 +269,7 @@ Port: Logger
       then a spawn-failure line naming the command and error is recorded
 ```
 
-### Port: ProcessControl (src: src/application/ports/process_control.rs; unit: tests/port_process_control.rs; integration: none; functional: none)
+### Port: ProcessControl (src: src/application/ports/process_control.rs; unit: tests/port_process_control.rs, src/adapters/process_control.rs; integration: none; functional: none)
 ```
 Port: ProcessControl
   current_pid
@@ -278,6 +278,7 @@ Port: ProcessControl
   is_live_pron
     when called with a pid that is not a live pron process
       then false is returned
+      and false is returned for a live process that is not pron
     when called with a configured live pron pid
       then true is returned
 ```
