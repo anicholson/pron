@@ -31,19 +31,23 @@ macro_rules! logger_contract {
                     fn then_begin_and_end_markers_with_command_and_output_are_recorded() {
                         use pron::application::ports::logger::Logger;
                         let (logger, read) = $setup;
-                        logger.log_job("echo hi", "hi", "");
+                        logger.log_job("job-one", "stdout-payload", "");
                         let recorded = read();
                         assert!(
-                            recorded.contains("--- begin: echo hi"),
+                            recorded.contains("--- begin: job-one"),
                             "expected begin marker in recorded output: {recorded}"
                         );
                         assert!(
-                            recorded.contains("hi"),
+                            recorded.contains("stdout-payload"),
                             "expected output in recorded output: {recorded}"
                         );
                         assert!(
-                            recorded.contains("--- end: echo hi"),
+                            recorded.contains("--- end: job-one"),
                             "expected end marker in recorded output: {recorded}"
+                        );
+                        assert!(
+                            !recorded.contains("--- stderr ---"),
+                            "no stderr section should be recorded when stderr is empty: {recorded}"
                         );
                     }
 
@@ -51,10 +55,10 @@ macro_rules! logger_contract {
                     fn and_stderr_is_included_between_the_markers_when_the_command_produced_any() {
                         use pron::application::ports::logger::Logger;
                         let (logger, read) = $setup;
-                        logger.log_job("echo hi 1>&2", "", "oops");
+                        logger.log_job("job-two", "", "stderr-payload");
                         let recorded = read();
                         assert!(
-                            recorded.contains("oops"),
+                            recorded.contains("stderr-payload"),
                             "expected stderr content in recorded output: {recorded}"
                         );
                         assert!(
