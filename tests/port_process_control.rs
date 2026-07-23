@@ -61,7 +61,10 @@ process_control_contract!(
         use pron::application::ports::process_control::ProcessControl;
         pron::adapters::process_control::RealProcessControl::new().is_live_pron(pid)
     }),
-    not_pron_alive: crate::with_non_pron_process(|pid| pid)
+    not_pron_alive: crate::with_non_pron_process(|pid| {
+        use pron::application::ports::process_control::ProcessControl;
+        pron::adapters::process_control::RealProcessControl::new().is_live_pron(pid)
+    })
 );
 
 /// Spawns a real, non-pron process (a `sleep`), hands its pid to `f`, then kills it.
