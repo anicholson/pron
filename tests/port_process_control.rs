@@ -24,9 +24,7 @@ macro_rules! process_control_contract {
                     $(
                     #[test]
                     fn and_false_is_returned_for_a_live_process_that_is_not_pron() {
-                        use pron::application::ports::process_control::ProcessControl;
-                        let pc = $make;
-                        assert!(!pc.is_live_pron($not_pron_alive_pid));
+                        assert!(!$not_pron_alive_check);
                     }
                     )?
                 }
