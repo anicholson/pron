@@ -17,6 +17,9 @@ impl Default for SystemClock {
 
 fn civil_from_days(z: i64) -> (i64, u32, u32) {
     let z = z + 719468;
+    // The z < 0 branch is unreachable in practice: SystemClock only ever calls this with
+    // `days` from a live wall clock (never before the Unix epoch), so z stays positive
+    // even at the proleptic-Gregorian boundary (year 1 AD still gives z > 0).
     let era = if z >= 0 { z / 146097 } else { (z - 146096) / 146097 };
     let doe = z - era * 146097;
     let yoe = (doe - doe / 1460 + doe / 36524 - doe / 146096) / 365;
