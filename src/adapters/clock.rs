@@ -115,10 +115,11 @@ mod tests {
         mod when_called_with_a_known_reference_time {
             #[test]
             fn then_the_correct_hour_and_minute_are_returned() {
-                let cases: [(i64, u32, u32); 5] = [
+                let cases: [(i64, u32, u32); 6] = [
                     (0, 0, 0),
                     (61, 0, 1),
                     (3661, 1, 1),
+                    (7321, 2, 2), // hms % 60 (1) would differ from (hms / 60) % 60 (2) here
                     (86399, 23, 59),
                     (86400, 0, 0), // wraps to the next day's midnight
                 ];
