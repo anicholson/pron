@@ -24,7 +24,7 @@
 | Integration (tree) | `make test-integration` | Driven Adapter + System + Journey (`tests/`) |
 | Flat output | `make test-flat` | Raw nextest, no tree formatter |
 | Watch | `make test-watch` | watchexec re-runs unit tests on `.rs` changes |
-| Mutation | `make test-mutate` | cargo-mutants, `pron` crate, `--lib` only |
+| Mutation | `make test-mutate` | cargo-mutants, whole `pron` crate, checked against `--lib` + `tests/port_*.rs` |
 | CI | `make test-ci` | Retries + JUnit XML |
 
 ### Per-layer filtersets
