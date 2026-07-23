@@ -49,3 +49,23 @@ impl ProcessControl for RealProcessControl {
         Self::process_is_alive(pid as i32) && Self::looks_like_pron(pid as i32)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    mod process_is_alive {
+        mod when_called_with_the_current_process_id {
+            #[test]
+            fn then_true_is_returned() {
+                let pid = std::process::id() as i32;
+                assert!(crate::adapters::process_control::RealProcessControl::process_is_alive(pid));
+            }
+        }
+
+        mod when_called_with_a_pid_that_does_not_exist {
+            #[test]
+            fn then_false_is_returned() {
+                assert!(!crate::adapters::process_control::RealProcessControl::process_is_alive(999999));
+            }
+        }
+    }
+}
