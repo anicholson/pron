@@ -51,7 +51,7 @@ System: pron-stop
 
 **Declared gap:** the `if the pid is still alive after 5s` path is untested — it requires a pron daemon stuck in a long job that ignores SIGTERM, a >5s scenario that's fragile to simulate. The implementation in `src/main.rs:do_stop` has the polling loop and warning; the contract documents the intent.
 
-**Declared gap:** the `where /proc is not available` path is untested — the suite runs on Linux, where the non-`/proc` branch (`src/main.rs:looks_like_pron`) is compiled out. The contract pins the intent: without cmdline verification, a live pid is assumed to be pron and is signalled.
+**Declared gap:** the `where /proc is not available` path is untested — the suite runs on Linux, where the non-`/proc` branch (`src/adapters/process_control.rs:looks_like_pron`) is compiled out. The contract pins the intent: without cmdline verification, a live pid is assumed to be pron and is signalled.
 
 **Declared gap:** the `if SIGTERM cannot be delivered` path is untested — `kill(2)` permission checks use the same uid/gid rules as the earlier liveness probe (`kill(pid, 0)`), so provoking a permission failure after that probe already passed would require the target process to change privileges during a narrow race window, or running the suite as a second, unprivileged user against another user's process. `src/main.rs:do_stop` implements the ESRCH-vs-other-error distinction via `std::io::Error::last_os_error()`; the non-ESRCH branch is exercised only by code review.
 
