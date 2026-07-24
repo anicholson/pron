@@ -4,6 +4,15 @@
 
 ## Install
 
+From a pre-built binary (Linux x86_64, Linux ARM64, macOS ARM64):
+
+```sh
+curl -sL https://github.com/anicholson/pron/releases/latest/download/pron-$(uname -m)-unknown-linux-musl.tar.gz | tar xz
+sudo mv pron /usr/local/bin/
+```
+
+Or from source:
+
 ```sh
 cargo install pron
 ```
