@@ -28,3 +28,33 @@ else
   fi
   echo "Latest version: $version"
 fi
+
+tmp=$(mktemp -d)
+trap 'rm -rf "$tmp"' EXIT
+
+case "$os-$arch" in
+  linux-x86_64)
+    artifact="pron-x86_64-unknown-linux-musl.tar.gz"
+    ;;
+  linux-aarch64)
+    artifact="pron-aarch64-unknown-linux-musl.tar.gz"
+    ;;
+  darwin-arm64)
+    artifact="pron-aarch64-apple-darwin.tar.gz"
+    ;;
+esac
+
+url="https://github.com/anicholson/pron/releases/download/${version}/${artifact}"
+echo "Downloading from $url..."
+
+if command -v curl >/dev/null 2>&1; then
+  curl -fsSL "$url" -o "$tmp/pron.tar.gz"
+elif command -v wget >/dev/null 2>&1; then
+  wget -qO "$tmp/pron.tar.gz" "$url"
+else
+  echo "Error: curl or wget required"
+  exit 1
+fi
+
+echo "Extracting..."
+tar -xzf "$tmp/pron.tar.gz" -C "$tmp"
