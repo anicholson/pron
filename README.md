@@ -4,7 +4,13 @@
 
 ## Install
 
-Download a pre-built binary from [GitHub Releases](https://github.com/anicholson/pron/releases) (Linux x86_64, Linux ARM64, macOS ARM64), or build from source:
+One-line install (Linux x86_64, Linux ARM64, macOS ARM64):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/anicholson/pron/main/install.sh | sh
+```
+
+Or download a pre-built binary from [GitHub Releases](https://github.com/anicholson/pron/releases), or build from source:
 
 ```sh
 cargo install pron
