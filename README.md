@@ -4,10 +4,8 @@
 
 ## Install
 
-Requires Rust (edition 2024).
-
 ```sh
-cargo build
+cargo install pron
 ```
 
 ## Use
