@@ -54,10 +54,12 @@ jobs:
       - name: Package
         run: |
           bin="target/${{ matrix.target }}/release/pron"
-          if [ "${{ matrix.runner }}" = "macos-latest" ]; then
-            strip "$bin"
-          else
-            strip --strip-all "$bin"
+          if [ "${{ matrix.cross }}" != "true" ]; then
+            if [ "${{ matrix.runner }}" = "macos-latest" ]; then
+              strip "$bin"
+            else
+              strip --strip-all "$bin"
+            fi
           fi
           tar czf pron-${{ matrix.target }}.tar.gz -C "$(dirname "$bin")" "$(basename "$bin")"
           if command -v sha256sum >/dev/null 2>&1; then
