@@ -1,6 +1,6 @@
 [package]
 name = "pron"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
 description = "A folder-scoped cron that reads a .prontab from its working directory"
 license = "MIT"
