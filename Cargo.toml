@@ -2,6 +2,9 @@
 name = "pron"
 version = "0.1.0"
 edition = "2024"
+description = "A folder-scoped cron that reads a .prontab from its working directory"
+license = "MIT"
+repository = "https://github.com/anicholson/pron"
 
 [features]
 test-support = []
@@ -20,3 +23,7 @@ debug = false
 
 [workspace]
 members = ["xtask"]
+
+[profile.release]
+codegen-units=1
+lto = true
