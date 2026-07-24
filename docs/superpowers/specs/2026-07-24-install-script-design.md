@@ -13,8 +13,10 @@ Minimal bash script (~40 lines), Approach 1 — simple implementation with manua
 ## Invocation
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/anicholson/pron/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/anicholson/pron/main/install.sh | bash
 ```
+
+Note: requires `bash` (not `sh`) because the script uses `set -o pipefail`, which is bash-specific. On Ubuntu, `sh` is `dash` and doesn't support `pipefail`.
 
 ## Platform Support
 
