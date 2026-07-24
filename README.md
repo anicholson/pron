@@ -7,7 +7,7 @@
 One-line install (Linux x86_64, Linux ARM64, macOS ARM64):
 
 ```sh
-curl -fsSL https://raw.githubusercontent.com/anicholson/pron/main/install.sh | sh
+curl -fsSL https://raw.githubusercontent.com/anicholson/pron/main/install.sh | bash
 ```
 
 Or download a pre-built binary from [GitHub Releases](https://github.com/anicholson/pron/releases), or build from source:
