@@ -58,3 +58,25 @@ fi
 
 echo "Extracting..."
 tar -xzf "$tmp/pron.tar.gz" -C "$tmp"
+
+if [ -w /usr/local/bin ] || sudo -n true 2>/dev/null; then
+  install_dir="/usr/local/bin"
+  sudo_cmd="sudo"
+else
+  install_dir="$HOME/.local/bin"
+  mkdir -p "$install_dir"
+  sudo_cmd=""
+fi
+
+echo "Installing to $install_dir..."
+$sudo_cmd mv "$tmp/pron" "$install_dir/pron"
+$sudo_cmd chmod +x "$install_dir/pron"
+
+if command -v pron >/dev/null 2>&1; then
+  echo "pron installed to $(command -v pron)"
+  pron --version 2>/dev/null || echo "pron installed successfully"
+else
+  echo "Error: pron not found in PATH after installation"
+  echo "Add $install_dir to your PATH"
+  exit 1
+fi
