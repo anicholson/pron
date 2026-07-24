@@ -15,3 +15,16 @@ case "$os-$arch" in
 esac
 
 echo "Platform: $os-$arch"
+
+if [ -n "${PRON_VERSION:-}" ]; then
+  version="$PRON_VERSION"
+  echo "Using version from PRON_VERSION: $version"
+else
+  version=$(curl -fsSL https://api.github.com/repos/anicholson/pron/releases/latest | grep '"tag_name"' | cut -d'"' -f4)
+  if [ -z "$version" ]; then
+    echo "Error: Failed to fetch latest version from GitHub API"
+    echo "Set PRON_VERSION=x.y.z to override (e.g., PRON_VERSION=v0.1.0)"
+    exit 1
+  fi
+  echo "Latest version: $version"
+fi
