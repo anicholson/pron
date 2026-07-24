@@ -283,6 +283,31 @@ Port: ProcessControl
     when called with a pid that is not a live pron process
       then false is returned
       and false is returned for a live process that is not pron
-    when called with a configured live pron pid
+     when called with a configured live pron pid
       then true is returned
+```
+
+### Install: install.sh (shell script, manual verification)
+```
+Install: install.sh
+  when invoked on a supported platform
+    then it resolves the latest release version from GitHub
+    and downloads the release tarball for the current platform
+    and installs the binary to /usr/local/bin (with sudo) or ~/.local/bin (without)
+    and verifies the binary is executable and in PATH
+  when invoked with PRON_VERSION set
+    then it uses the specified version instead of fetching the latest
+  when invoked on an unsupported platform
+    then it prints an error listing supported platforms
+    and exits with code 1
+  if version resolution fails
+    then it prints an error suggesting PRON_VERSION override
+    and exits with code 1
+  if download fails
+    then it prints an error with the attempted URL
+    and exits with code 1
+  if the binary is not in PATH after installation
+    then it prints an error suggesting the user add the install directory to PATH
+    and exits with code 1
+```
 ```
